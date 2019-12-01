@@ -1,4 +1,7 @@
 import sys
+import os, os.path
+import PIL.Image as Image
+
 from random import randint
 
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
@@ -9,7 +12,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic.properties import QtGui
 
-imagePath = "../InterfataProiectAI/Imagini/FirstImage.png"
+imagePath = "../desktop_app/lego_pictures/"
+list_of_images_id = []
+dictionary_of_images_size = {}
 
 
 class ImgWidget(QWidget):
@@ -47,6 +52,7 @@ class MainWindow(QWidget):
         self.add_filter_label()
         self.add_filter_line()
         self.left_side_layout.addLayout(self.left_side_filter_layout)
+        # self.left_side_layout.setSizeConstraint(QLayout_SizeConstraint=s)
         self.tab_layout.addLayout(self.left_side_layout)
 
 
@@ -145,37 +151,51 @@ class MainWindow(QWidget):
 
     def creating_tables(self):
         self.tableWidget = QTableWidget()
-        self.tableWidget.setRowCount(5)
+        self.row_count = self.get_number_of_lines()
+        self.tableWidget.setRowCount(self.row_count)
         self.tableWidget.setColumnCount(2)
-        # self.tableWidget.resize(300, 800)
-
-        self.tableWidget.setItem(0, 0, QTableWidgetItem("Name"))
-        self.tableWidget.setItem(0, 1, QTableWidgetItem("Email"))
-        # self.tableWidget.setItem(0, 2, QTableWidgetItem("Phone No"))
-
-        self.tableWidget.setCellWidget(1, 0, ImgWidget(self))
-        self.tableWidget.setItem(1, 1, QTableWidgetItem("parwiz@gmail.com"))
-        # self.tableWidget.setItem(1, 2, QTableWidgetItem("845845845"))
-        self.tableWidget.setColumnWidth(1, 200)
-
-        self.tableWidget.setItem(2, 0, QTableWidgetItem("Ahmad"))
-        self.tableWidget.setItem(2, 1, QTableWidgetItem("ahmad@gmail.com"))
-        # self.tableWidget.setItem(2, 2, QTableWidgetItem("2232324"))
-
-        self.tableWidget.setItem(3, 0, QTableWidgetItem("John"))
-        self.tableWidget.setItem(3, 1, QTableWidgetItem("john@gmail.com"))
-        # self.tableWidget.setItem(3, 2, QTableWidgetItem("2236786782324"))
-
-        self.tableWidget.setItem(4, 0, QTableWidgetItem("Doe"))
-        self.tableWidget.setItem(4, 1, QTableWidgetItem("Doe@gmail.com"))
-        # self.tableWidget.setItem(4, 2, QTableWidgetItem("12343445"))
 
         self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Imagine"))
         self.tableWidget.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
-        # self.tableWidget.setHorizontalHeaderItem(2, QTableWidgetItem("Dimensiune"))
 
-        self.tableWidget.setFixedWidth(300)
+        global imagePath
+        global list_of_images_id
+        self.max_width = 0
+
+        for i in range(0, self.row_count):
+            path = imagePath
+            imagePath = imagePath + list_of_images_id[i]
+
+            self.tableWidget.setCellWidget(i, 0, ImgWidget(self))
+            id_item = QTableWidgetItem(list_of_images_id[i])
+            id_item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(i, 1, id_item)
+
+            image = Image.open(imagePath + ".png")
+            width, height = image.size
+            self.tableWidget.setRowHeight(i, height)
+            imagePath = path
+            if width > self.max_width:
+                self.max_width = width
+
+        self.tableWidget.setColumnWidth(0, self.max_width)
+
+        print(self.tableWidget.geometry())
+        print(self.tableWidget.columnWidth(0))
+        print(self.tableWidget.columnWidth(1))
+        self.tableWidget.setFixedWidth(self.tableWidget.columnWidth(0) + self.tableWidget.columnWidth(1) + 41)
+        print(self.tableWidget.width())
         self.left_side_layout.addWidget(self.tableWidget)
+
+    def get_number_of_lines(self):
+        global list_of_images_id
+        count = 0
+        for root, dirs, files in os.walk("../desktop_app/lego_pictures"):
+            for i in files:
+                if i.split(".")[1] == "png":
+                    list_of_images_id.append(i.split(".")[0])
+                    count += 1
+        return count
 
 
 if __name__ == "__main__":
