@@ -30,6 +30,11 @@ class Brick:
     # functia asta pune obiectul peste alte obiecte (in studs)
     # piesa va fi pusa de la x la x + width, y la y + length, z la z + height
     def place_in_studs(self, start_coordinates, brick_list):
+        # daca piesa este deja pusa undeva returneaza fals
+        global _lego_bricks
+        if _lego_bricks[self.brick_id][1]:
+            return False
+
         # se iau toate coordonatele la studs care sunt libere si pe aceeasi inaltime
         empty_studs_in_list = []
         for brick in brick_list:
@@ -46,7 +51,7 @@ class Brick:
         for height in range(start_coordinates[2], start_coordinates[2] + self.height):
             spaces_to_occupy = []
             for space in self.space:
-                if space[2] == height:
+                if space[2] == height - start_coordinates[2]:
                     spaces_to_occupy.append([space[0] + start_coordinates[0], space[1] + start_coordinates[1], height])
             occupied_space = _occupied_space.get(height)
             if occupied_space is None:
@@ -60,20 +65,22 @@ class Brick:
                     self.occupied_space.append(space)
 
         # daca s-a ajuns pana aici inseamna ca piesa va fi pusa
-        global _lego_bricks
         _lego_bricks[self.brick_id] = [self, True]
         for space in self.occupied_space:
             _occupied_space[space[2]].append(space)
         for stud in self.studs:
-            self.stud_coordinates.append([stud[0] + start_coordinates[0], stud[1] + start_coordinates[1], stud[2] + start_coordinates[2], 0])
+            self.stud_coordinates.append(
+                [stud[0] + start_coordinates[0], stud[1] + start_coordinates[1], stud[2] + start_coordinates[2] + 1, 0])
         for tube in self.tubes:
-            self.tube_coordinates.append([tube[0] + start_coordinates[0], tube[1] + start_coordinates[1], tube[2] + start_coordinates[2], 0])
+            self.tube_coordinates.append(
+                [tube[0] + start_coordinates[0], tube[1] + start_coordinates[1], tube[2] + start_coordinates[2], 0])
         for brick in brick_list:
             for stud in brick.stud_coordinates:
                 for tube in self.tube_coordinates:
                     if stud[0] == tube[0] and stud[1] == tube[1] and stud[2] == tube[2] and stud[3] == 0:
                         stud[3] = self.brick_id
                         tube[3] = brick.brick_id
+        return True
 
     # functia asta pune obiectul in tuburile altui obiect
     def place_in_tubes(self, start_coordinates, brick_list):
@@ -95,19 +102,42 @@ class Brick:
 
 
 def initialize_lego_bricks_dict():
-    base_brick = Brick(0, 0, 0, 0, "", [], [], [])
-    base_brick.stud_coordinates = [[0, 0, 0, 0], [0, 1, 0, 0], [0, 2, 0, 0], [0, 3, 0, 0], [0, 4, 0, 0],
-                                   [1, 0, 0, 0], [1, 1, 0, 0], [1, 2, 0, 0], [1, 3, 0, 0], [1, 4, 0, 0],
-                                   [2, 0, 0, 0], [2, 1, 0, 0], [2, 2, 0, 0], [2, 3, 0, 0], [2, 4, 0, 0],
-                                   [3, 0, 0, 0], [3, 1, 0, 0], [3, 2, 0, 0], [3, 3, 0, 0], [3, 4, 0, 0]]
+    base_brick = Brick(0, 4, 4, 1, "", [], [], [])
+    base_brick.stud_coordinates = [[0, 0, 1, 0], [0, 1, 1, 0], [0, 2, 1, 0], [0, 3, 1, 0],
+                                   [1, 0, 1, 0], [1, 1, 1, 0], [1, 2, 1, 0], [1, 3, 1, 0],
+                                   [2, 0, 1, 0], [2, 1, 1, 0], [2, 2, 1, 0], [2, 3, 1, 0],
+                                   [3, 0, 1, 0], [3, 1, 1, 0], [3, 2, 1, 0], [3, 3, 1, 0]]
+    base_brick.occupied_space = [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0],
+                                 [1, 0, 0], [1, 1, 0], [1, 2, 0], [1, 3, 0],
+                                 [2, 0, 0], [2, 1, 0], [2, 2, 0], [2, 3, 0],
+                                 [3, 0, 0], [3, 1, 0], [3, 2, 0], [3, 3, 0]]
+    global _occupied_space
+    _occupied_space[0] = [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0],
+                          [1, 0, 0], [1, 1, 0], [1, 2, 0], [1, 3, 0],
+                          [2, 0, 0], [2, 1, 0], [2, 2, 0], [2, 3, 0],
+                          [3, 0, 0], [3, 1, 0], [3, 2, 0], [3, 3, 0]]
 
 
 if __name__ == '__main__':
     initialize_lego_bricks_dict()
     test_brick = Brick(6, 1, 1, 1, "White", [[0, 0, 0]], [[0, 0, 0]], [[0, 0, 0]])  # piesa generica de 1x1x1
-    test_brick_2 = Brick(9, 2, 2, 3, "White", [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1], [0, 0, 2], [0, 1, 2], [1, 0, 2], [1, 1, 2]],
+    test_brick_2 = Brick(9, 2, 2, 3, "White",
+                         [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1],
+                          [0, 0, 2], [0, 1, 2], [1, 0, 2], [1, 1, 2]],
                          [[0, 0, 2], [0, 1, 2], [1, 0, 2], [1, 1, 2]],
-                         [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0]])  # piesa generica de 2x2x3 (2x2 de inaltime "normala")
-    test_brick_2.place_in_studs([0, 0, 0], [_lego_bricks[1][0]])
+                         [[0, 0, 0], [0, 1, 0], [1, 0, 0],
+                          [1, 1, 0]])  # piesa generica de 2x2x3 (2x2 de inaltime "normala")
+    print(test_brick_2.place_in_studs([0, 0, 1], [_lego_bricks[1][0]]))
+    # print(_lego_bricks[1][0].occupied_space)
     # print(_lego_bricks[1][0].stud_coordinates)
-    print(_lego_bricks[3][0].occupied_space)
+    # print(_lego_bricks[1][0].tube_coordinates)
+    # print(_lego_bricks[3][0].occupied_space)
+    # print(_lego_bricks[3][0].stud_coordinates)
+    # print(_lego_bricks[3][0].tube_coordinates)
+    # print(test_brick.place_in_studs([0, 0, 0], [_lego_bricks[1][0]]))
+    print(test_brick.place_in_studs([0, 0, 4], [_lego_bricks[3][0]]))
+    print(_lego_bricks[2][0].occupied_space)
+    print(_lego_bricks[2][0].stud_coordinates)
+    print(_lego_bricks[2][0].tube_coordinates)
+    for key, value in _occupied_space.items():
+        print(key, value)
