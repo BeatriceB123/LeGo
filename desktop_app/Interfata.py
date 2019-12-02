@@ -196,3 +196,9 @@ class MainWindow(QWidget):
                     list_of_images_id.append(i.split(".")[0])
                     count += 1
         return count
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    mainWin = MainWindow()
+    sys.exit(app.exec_())
