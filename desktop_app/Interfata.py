@@ -10,6 +10,7 @@ from PyQt5.QtGui import *
 imagePath = "../desktop_app/lego_pictures/"
 list_of_images_id = []
 dictionary_of_images_size = {}
+current_piece = ""
 
 
 class ImgWidget(QWidget):
@@ -26,7 +27,6 @@ class ImgWidget(QWidget):
 class AddItemWindow(QWidget):
 
     def __init__(self, parent=None):
-        # QWidget.__init__(self, *args)
         super(AddItemWindow, self).__init__(parent)
         self.setFixedWidth(400)
         self.setFixedHeight(250)
@@ -36,20 +36,97 @@ class AddItemWindow(QWidget):
 
     def init_UI(self):
         self.tab_layout = QVBoxLayout()
-        self.title_layout = QHBoxLayout()
+        self.amount_layout = QHBoxLayout()
+        self.color_layout = QHBoxLayout()
         self.setLayout(self.tab_layout)
 
         self.add_title_label()
-        self.tab_layout.addLayout(self.title_layout)
+        self.add_error_label()
+        self.add_id_line()
+        self.add_amount_line()
+        self.tab_layout.addLayout(self.amount_layout)
+        self.add_color_line()
+        self.tab_layout.addLayout(self.color_layout)
+        self.add_confirm_button()
 
         self.show()
 
     def add_title_label(self):
         self.label = QLabel()
         self.label.setText("Add a brick type")
-        self.title_layout.setAlignment(Qt.AlignCenter)
+        self.label.setStyleSheet("font-weight: bold; font-size: 20px;")
 
-        self.title_layout.addWidget(self.label)
+        self.tab_layout.addWidget(self.label, alignment=Qt.AlignCenter)
+
+    def add_error_label(self):
+        self.error_label = QLabel()
+        self.error_label.setText("Give a valid amount of bricks")
+        self.error_label.setStyleSheet("color:red; font-weight: bold; font-size: 15px;")
+        self.error_label.setVisible(False)
+
+        self.tab_layout.addWidget(self.error_label, alignment=Qt.AlignCenter)
+
+    def add_id_line(self):
+        global current_piece
+        self.id_label = QLabel()
+        self.id_label.setText("ID piesa: " + current_piece)
+
+        self.tab_layout.addWidget(self.id_label, alignment=Qt.AlignCenter)
+
+    def add_amount_line(self):
+        self.amount_label = QLabel()
+        self.amount_label.setText("Number of bricks: ")
+
+        self.amount_layout.addWidget(self.amount_label)
+
+        self.amount_line_edit = QLineEdit()
+        self.amount_line_edit.setValidator(QIntValidator())
+
+        self.amount_layout.addWidget(self.amount_line_edit)
+
+    def add_color_line(self):
+        self.color_label = QLabel()
+        self.color_label.setText("Choose color")
+
+        self.color_layout.addWidget(self.color_label)
+
+        self.color_box = QComboBox()
+        self.color_box.addItem("Blue")
+        self.color_box.addItem("Red")
+        self.color_box.addItem("Green")
+
+        self.color_layout.addWidget(self.color_box)
+
+    def add_confirm_button(self):
+        self.confirm_button = QPushButton()
+        self.confirm_button.setText("Confirm")
+        self.confirm_button.clicked.connect(self.confirm_functionality)
+
+        self.tab_layout.addWidget(self.confirm_button, alignment=Qt.AlignCenter)
+
+    def confirm_functionality(self):
+        global imagePath, current_piece
+        if self.amount_line_edit.text() == '':
+            self.error_label.setVisible(True)
+        else:
+            path = imagePath
+            imagePath = imagePath + current_piece + ".png"
+
+            row_position = mainWin.tableWidgetRight.rowCount()
+            mainWin.tableWidgetRight.insertRow(row_position)
+
+            mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0, ImgWidget(self))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 1, QTableWidgetItem(current_piece))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 2, QTableWidgetItem(self.amount_line_edit.text()))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 3, QTableWidgetItem(self.color_box.currentText()))
+
+            image = Image.open(imagePath)
+            width, height = image.size
+            mainWin.tableWidgetRight.setRowHeight(mainWin.tableWidgetRight.rowCount() - 1, height)
+
+            imagePath = path
+
+            self.close()
 
 
 
@@ -164,18 +241,15 @@ class MainWindow(QWidget):
         self.import_export_layout.addWidget(self.button_export)
 
     def create_second_table(self):
-        self.tableWidget = QTableWidget()
-        self.tableWidget.setRowCount(4)
-        self.tableWidget.setColumnCount(4)
-        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
-        self.tableWidget.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
-        self.tableWidget.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
-        self.tableWidget.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
-        self.tableWidget.setItem(0, 0, QTableWidgetItem("Name"))
-        self.tableWidget.setItem(0, 1, QTableWidgetItem("Email"))
-        self.tableWidget.setItem(0, 2, QTableWidgetItem("Phone No"))
+        self.tableWidgetRight = QTableWidget()
+        self.tableWidgetRight.setRowCount(0)
+        self.tableWidgetRight.setColumnCount(4)
+        self.tableWidgetRight.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
+        self.tableWidgetRight.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
+        self.tableWidgetRight.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
+        self.tableWidgetRight.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
 
-        self.right_side_layout.addWidget(self.tableWidget)
+        self.right_side_layout.addWidget(self.tableWidgetRight)
 
     def creating_tables(self):
         self.tableWidget = QTableWidget()
@@ -223,6 +297,8 @@ class MainWindow(QWidget):
         print("Not implemented")
 
     def cell_was_clicked(self, row, column):
+        global current_piece
+        current_piece = self.tableWidget.item(row, 1).text()
         self.tab = AddItemWindow()
         self.tab.show()
 
