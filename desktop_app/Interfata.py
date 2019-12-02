@@ -2,15 +2,10 @@ import sys
 import os, os.path
 import PIL.Image as Image
 
-from random import randint
-
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
-
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.uic.properties import QtGui
 
 imagePath = "../desktop_app/lego_pictures/"
 list_of_images_id = []
@@ -26,6 +21,48 @@ class ImgWidget(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.drawPixmap(0, 0, self.pic)
+
+
+class AddItemWindow(QWidget):
+
+    def __init__(self, parent=None):
+        # QWidget.__init__(self, *args)
+        super(AddItemWindow, self).__init__(parent)
+        self.setFixedWidth(400)
+        self.setFixedHeight(250)
+        self.setWindowTitle("Add piece")
+        self.move(700, 300)
+        self.init_UI()
+
+    def init_UI(self):
+        self.tab_layout = QVBoxLayout()
+        self.title_layout = QHBoxLayout()
+        self.setLayout(self.tab_layout)
+
+        self.add_title_label()
+        self.tab_layout.addLayout(self.title_layout)
+
+        self.show()
+
+    def add_title_label(self):
+        self.label = QLabel()
+        self.label.setText("Add a brick type")
+        self.title_layout.setAlignment(Qt.AlignCenter)
+
+        self.title_layout.addWidget(self.label)
+
+
+
+
+def get_number_of_lines():
+    global list_of_images_id
+    count = 0
+    for root, dirs, files in os.walk("../desktop_app/lego_pictures"):
+        for i in files:
+            if i.split(".")[1] == "png":
+                list_of_images_id.append(i.split(".")[0])
+                count += 1
+    return count
 
 
 class MainWindow(QWidget):
@@ -52,9 +89,7 @@ class MainWindow(QWidget):
         self.add_filter_label()
         self.add_filter_line()
         self.left_side_layout.addLayout(self.left_side_filter_layout)
-        # self.left_side_layout.setSizeConstraint(QLayout_SizeConstraint=s)
         self.tab_layout.addLayout(self.left_side_layout)
-
 
         self.create_second_table()
         self.tab_layout.addLayout(self.right_side_layout)
@@ -67,15 +102,9 @@ class MainWindow(QWidget):
         self.right_side_layout.addLayout(self.second_condition_line)
         self.add_generate_button()
 
-        # self.left_side_layout.setGeometry(QRect(0, 0, 100, 900))
-        # print(self.left_side_layout.direction())
-
-
         self.left_side_filter_layout.setSpacing(0)
 
-
         self.show()
-
 
     def add_filter_label(self):
         self.label = QLabel()
@@ -92,6 +121,8 @@ class MainWindow(QWidget):
         self.button_generate.setFixedHeight(40)
         self.button_generate.setFixedWidth(170)
         self.button_generate.setStyleSheet("background-color:#6e6e6e")
+        self.button_generate.clicked.connect(self.generate_button_clicked)
+
         self.right_side_layout.addWidget(self.button_generate, alignment=Qt.AlignCenter)
 
     def add_second_condition_line(self):
@@ -119,15 +150,17 @@ class MainWindow(QWidget):
         self.button_import = QPushButton('Import', self)
         self.button_import.setFixedHeight(40)
         self.button_import.setFixedWidth(170)
-        # self.button_start.move(500, 215)
         self.button_import.setStyleSheet("background-color:#6e6e6e")
+        self.button_import.clicked.connect(self.import_button_clicked)
+
         self.import_export_layout.addWidget(self.button_import)
 
         self.button_export = QPushButton('Export', self)
         self.button_export.setFixedHeight(40)
         self.button_export.setFixedWidth(170)
-        # self.button_end.move(500, 115)
         self.button_export.setStyleSheet("background-color:#6e6e6e")
+        self.button_export.clicked.connect(self.export_button_clicked)
+
         self.import_export_layout.addWidget(self.button_export)
 
     def create_second_table(self):
@@ -141,17 +174,12 @@ class MainWindow(QWidget):
         self.tableWidget.setItem(0, 0, QTableWidgetItem("Name"))
         self.tableWidget.setItem(0, 1, QTableWidgetItem("Email"))
         self.tableWidget.setItem(0, 2, QTableWidgetItem("Phone No"))
-        # self.tableWidget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        header = self.tableWidget.horizontalHeader()
-        # header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        # header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
-        # header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
 
         self.right_side_layout.addWidget(self.tableWidget)
 
     def creating_tables(self):
         self.tableWidget = QTableWidget()
-        self.row_count = self.get_number_of_lines()
+        self.row_count = get_number_of_lines()
         self.tableWidget.setRowCount(self.row_count)
         self.tableWidget.setColumnCount(2)
 
@@ -179,23 +207,24 @@ class MainWindow(QWidget):
                 self.max_width = width
 
         self.tableWidget.setColumnWidth(0, self.max_width)
-
-        print(self.tableWidget.geometry())
-        print(self.tableWidget.columnWidth(0))
-        print(self.tableWidget.columnWidth(1))
         self.tableWidget.setFixedWidth(self.tableWidget.columnWidth(0) + self.tableWidget.columnWidth(1) + 41)
-        print(self.tableWidget.width())
+
+        self.tableWidget.cellClicked.connect(self.cell_was_clicked)
+
         self.left_side_layout.addWidget(self.tableWidget)
 
-    def get_number_of_lines(self):
-        global list_of_images_id
-        count = 0
-        for root, dirs, files in os.walk("../desktop_app/lego_pictures"):
-            for i in files:
-                if i.split(".")[1] == "png":
-                    list_of_images_id.append(i.split(".")[0])
-                    count += 1
-        return count
+    def generate_button_clicked(self):
+        print("Not implemented")
+
+    def import_button_clicked(self):
+        print("Not implemented")
+
+    def export_button_clicked(self):
+        print("Not implemented")
+
+    def cell_was_clicked(self, row, column):
+        self.tab = AddItemWindow()
+        self.tab.show()
 
 
 if __name__ == "__main__":
