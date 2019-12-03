@@ -266,6 +266,7 @@ class MainWindow(QWidget):
         self.tableWidgetRight.setRowCount(0)
         self.tableWidgetRight.setColumnCount(4)
         self.tableWidgetRight.setColumnWidth(0, self.max_width)
+        self.tableWidgetRight.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidgetRight.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidgetRight.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
         self.tableWidgetRight.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
