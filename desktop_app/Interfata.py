@@ -13,6 +13,12 @@ dictionary_of_images_size = {}
 current_piece = ""
 
 
+class AlignDelegate(QtWidgets.QStyledItemDelegate):
+    def initStyleOption(self, option, index):
+        super(AlignDelegate, self).initStyleOption(option, index)
+        option.displayAlignment = Qt.AlignCenter
+
+
 class ImgWidget(QWidget):
 
     def __init__(self, parent=None):
@@ -49,6 +55,13 @@ class AddItemWindow(QWidget):
         self.tab_layout.addLayout(self.color_layout)
         self.add_confirm_button()
 
+        try:
+            # quit(self.close_event_handler)
+            quit = QAction("Quit", self)
+            quit.triggered.connect(self.close)
+
+        except Exception as e:
+            print(e)
         self.show()
 
     def add_title_label(self):
@@ -106,6 +119,7 @@ class AddItemWindow(QWidget):
 
     def confirm_functionality(self):
         global imagePath, current_piece
+
         if self.amount_line_edit.text() == '':
             self.error_label.setVisible(True)
         else:
@@ -116,19 +130,25 @@ class AddItemWindow(QWidget):
             mainWin.tableWidgetRight.insertRow(row_position)
 
             mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0, ImgWidget(self))
-            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 1, QTableWidgetItem(current_piece))
-            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 2, QTableWidgetItem(self.amount_line_edit.text()))
-            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 3, QTableWidgetItem(self.color_box.currentText()))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 1,
+                                             QTableWidgetItem(current_piece))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 2,
+                                             QTableWidgetItem(self.amount_line_edit.text()))
+            mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 3,
+                                             QTableWidgetItem(self.color_box.currentText()))
 
             image = Image.open(imagePath)
             width, height = image.size
             mainWin.tableWidgetRight.setRowHeight(mainWin.tableWidgetRight.rowCount() - 1, height)
 
             imagePath = path
+            mainWin.setEnabled(True)
 
             self.close()
 
-
+    def closeEvent(self, event):
+        mainWin.setEnabled(True)
+        event.accept()
 
 
 def get_number_of_lines():
@@ -191,6 +211,7 @@ class MainWindow(QWidget):
     def add_filter_line(self):
         self.input = QLineEdit()
         self.input.setFixedWidth(200)
+        self.input.setValidator(QIntValidator())
         self.left_side_filter_layout.addWidget(self.input, alignment=Qt.AlignLeft)
 
     def add_generate_button(self):
@@ -244,10 +265,16 @@ class MainWindow(QWidget):
         self.tableWidgetRight = QTableWidget()
         self.tableWidgetRight.setRowCount(0)
         self.tableWidgetRight.setColumnCount(4)
+        self.tableWidgetRight.setColumnWidth(0, self.max_width)
         self.tableWidgetRight.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidgetRight.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
         self.tableWidgetRight.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
         self.tableWidgetRight.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
+
+        delegate = AlignDelegate(self.tableWidgetRight)
+        self.tableWidgetRight.setItemDelegateForColumn(1, delegate)
+        self.tableWidgetRight.setItemDelegateForColumn(2, delegate)
+        self.tableWidgetRight.setItemDelegateForColumn(3, delegate)
 
         self.right_side_layout.addWidget(self.tableWidgetRight)
 
@@ -300,6 +327,9 @@ class MainWindow(QWidget):
         global current_piece
         current_piece = self.tableWidget.item(row, 1).text()
         self.tab = AddItemWindow()
+        # self.setWindowModality(Qt.ApplicationModal)
+        self.setEnabled(False)
+
         self.tab.show()
 
 
