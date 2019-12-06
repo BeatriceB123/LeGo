@@ -90,15 +90,15 @@ class Configuration:
 
 
 class Brick:
-    def __init__(self, db_id, color, configuration):
+    def __init__(self, db_id, color, given_configuration):
         self.db_id = db_id
-        self.brick_id = len(configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+        self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
         self.color = color
 
         # urmatoarele atribute sunt folosite atunci cand piesa este pusa in alta piesa
         self.rotation = 0  # 0 -> in dreapta, 1 -> in jos, 2 -> in stanga, 3 -> in sus
 
-        configuration.lego_bricks[self.brick_id] = [self, False]
+        given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
 def initialize_lego_bricks_dict(given_configuration):
