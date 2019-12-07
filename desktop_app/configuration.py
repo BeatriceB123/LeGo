@@ -48,8 +48,9 @@ class Configuration:
                 self.occupied_space[height] = []
                 occupied_space = []
             for space in spaces_to_occupy:
-                if space in occupied_space:
-                    return False
+                for aux_space in occupied_space:
+                    if space[0] == aux_space[0] and space[1] == aux_space[1] and space[2] == aux_space[2]:
+                        return False
                 else:
                     all_spaces_to_occupy.append(space)
 
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     # print(test_brick.place_in_studs([0, 0, 3], [_lego_bricks[1][0]]))
     # print(_lego_bricks[1][0].stud_coordinates)
     # print(_lego_bricks[1][0].tube_coordinates)
-    print(configuration.place_in_studs(test_brick_3, [0, 2, 0]))
+    print(configuration.place_in_studs(test_brick_3, [0, 1, 0]))
     print(configuration.place_in_studs(test_brick_4, [1, 1, 3]))
     print(configuration.place_in_studs(test_brick_5, [2, 2, 6]))
     for key, value in configuration.occupied_space.items():
