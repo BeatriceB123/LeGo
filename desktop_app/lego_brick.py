@@ -5,6 +5,21 @@ _occupied_tubes = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coord
 _db_brick_info = dict()  # cheia va fi id-ul din bd, valoarea va fi o lista de 3 elemente (lungime, latime, inaltime) si 3 liste: spaces, studs, tubes
 
 
+def rotate_our_space(coord_li, l, L, rotation):
+    # facem rotatia in sensul acelor de ceasornic; avand in vedere ce piese avem, rotatia apartine {0, 1, 2, 3}
+    if rotation == 0:
+        return coord_li
+    if rotation == 1:
+        '''brick_length = csf.db_brick_info[self.db_id][0]
+        li_all_coords_spaces = csf.db_brick_info[self.db_id][3]
+        li_all_coords_studs = csf.db_brick_info[self.db_id][4]
+        li_all_coords_tubes = csf.db_brick_info[self.db_id][5]
+        self.space = rotate_aux_because_we_have_3_lists(li_all_coords_spaces, brick_length)
+        self.space = rotate_aux_because_we_have_3_lists(li_all_coords_studs, brick_length)
+        self.space = rotate_aux_because_we_have_3_lists(li_all_coords_tubes, brick_length)'''
+        return coord_li
+
+
 class Brick:
     def __init__(self, db_id, color):
         global _lego_bricks
@@ -32,13 +47,17 @@ class Brick:
         if _lego_bricks[self.brick_id][1]:
             return False
 
-        # se verifica daca coordonata de start e valabila
-        if start_coordinates[2] != 0:
-            if [start_coordinates[0], start_coordinates[1], start_coordinates[2], 0] not in _occupied_studs[start_coordinates[2]]:
-                return False
+        # TODO: se verifica daca exista macar un stud valabil de care ne putem lega
+        # if start_coordinates[2] != 0:
+        #     if [start_coordinates[0], start_coordinates[1], start_coordinates[2], 0] not in _occupied_studs[start_coordinates[2]]:
+        #         return False
 
         # calculeaza spatiile ce va ocupa piesa si daca sunt valabile
         all_spaces_to_occupy = []
+
+        # our_h = _db_brick_info[self.db_id][2]
+        # our_space = rotate_our_space(_db_brick_info[self.db_id][3], _db_brick_info[self.db_id][3], _db_brick_info[self.db_id][3], rotation)
+
         for height in range(start_coordinates[2], start_coordinates[2] + _db_brick_info[self.db_id][2]):
             spaces_to_occupy = []
             for space in _db_brick_info[self.db_id][3]:
@@ -98,46 +117,28 @@ class Brick:
 
 
 def initialize_lego_bricks_dict():
-    # base_brick = Brick(0, "")
-    # base_brick.stud_coordinates = [[0, 0, 1, 0], [0, 1, 1, 0], [0, 2, 1, 0], [0, 3, 1, 0],
-    #                                [1, 0, 1, 0], [1, 1, 1, 0], [1, 2, 1, 0], [1, 3, 1, 0],
-    #                                [2, 0, 1, 0], [2, 1, 1, 0], [2, 2, 1, 0], [2, 3, 1, 0],
-    #                                [3, 0, 1, 0], [3, 1, 1, 0], [3, 2, 1, 0], [3, 3, 1, 0]]
-    # base_brick.occupied_space = [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0],
-    #                              [1, 0, 0], [1, 1, 0], [1, 2, 0], [1, 3, 0],
-    #                              [2, 0, 0], [2, 1, 0], [2, 2, 0], [2, 3, 0],
-    #                              [3, 0, 0], [3, 1, 0], [3, 2, 0], [3, 3, 0]]
-    # global _occupied_space
-    # _occupied_space[0] = [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 3, 0],
-    #                       [1, 0, 0], [1, 1, 0], [1, 2, 0], [1, 3, 0],
-    #                       [2, 0, 0], [2, 1, 0], [2, 2, 0], [2, 3, 0],
-    #                       [3, 0, 0], [3, 1, 0], [3, 2, 0], [3, 3, 0]]
-    # global _db_brick_info
-    _db_brick_info[6] = [1, 1, 1, [[0, 0, 0]], [[0, 0, 1]], [[0, 0, 0]]]
-    _db_brick_info[9] = [2, 2, 3,
-                                [[0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0], [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1],
-                                 [0, 0, 2], [0, 1, 2], [1, 0, 2], [1, 1, 2]],
-                                [[0, 0, 3], [0, 1, 3], [1, 0, 3], [1, 1, 3]],
-                                [[0, 0, 0], [0, 1, 0], [1, 0, 0],
-                                 [1, 1, 0]]]
+    file_json = './lego_piece_info.json'
+    db_brick_info = dict()
+    with open(file_json, 'rb') as data_file:
+        import json
+        data = json.load(data_file)
+        for elm in data['piece-list']:
+            db_brick_info[elm['id']] = [elm['length'], elm['width'], elm['height'],
+                                        (elm['space']),
+                                        (elm['studs']),
+                                        (elm['tubes'])]
+    global _db_brick_info
+    _db_brick_info = db_brick_info
 
 
 if __name__ == '__main__':
     initialize_lego_bricks_dict()
+
     test_brick = Brick(6, "White")  # piesa generica de 1x1x1
     test_brick_2 = Brick(9, "White")  # piesa generica de 2x2x3 (2x2 de inaltime "normala")
     test_brick_3 = Brick(9, "White")
     test_brick_4 = Brick(9, "White")
     test_brick_5 = Brick(9, "White")
-    print(test_brick_2.place_in_studs([0, 0, 0], 0))
-    # print(_lego_bricks[1][0].stud_coordinates)
-    # print(_lego_bricks[1][0].tube_coordinates)
-    # print(_lego_bricks[3][0].stud_coordinates)
-    # print(_lego_bricks[3][0].tube_coordinates)
-    # print(test_brick.place_in_studs([0, 0, 0], [_lego_bricks[1][0]]))
-    # print(test_brick.place_in_studs([0, 0, 3], [_lego_bricks[1][0]]))
-    # print(_lego_bricks[1][0].stud_coordinates)
-    # print(_lego_bricks[1][0].tube_coordinates)
     print(test_brick_3.place_in_studs([0, 2, 0], 0))
     print(test_brick_4.place_in_studs([1, 1, 3], 0))
     print(test_brick_5.place_in_studs([0, 2, 3], 0))
