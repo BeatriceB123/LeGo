@@ -8,27 +8,52 @@ def rotate_1(li_coord, length):
     return new_li_coord
 
 
+def rotate_2(li_coord, length, width):
+    new_li_coord = []
+    for coords in li_coord:
+        new_x = length - 1 - coords[0]
+        new_y = width - 1 - coords[1]
+        new_li_coord.append((new_x, new_y, coords[2]))
+    return new_li_coord
+
+
+def rotate_3(li_coord, width):
+    new_li_coord = []
+    for coords in li_coord:
+        new_x = width - 1 - coords[1]
+        new_y = coords[0]
+        new_li_coord.append((new_x, new_y, coords[2]))
+    return new_li_coord
+
+
 def rotate_our_coordinates(brick_db_info, rotation):
     # facem rotatia in sensul acelor de ceasornic; rotatia apartine {0, 1, 2, 3}
     new_brick_info = brick_db_info.copy()
-    if rotation == 0:
-        return new_brick_info
-    if rotation == 1:
-        brick_length = new_brick_info[0]
-        brick_width = new_brick_info[1]
-        li_all_coords_spaces = new_brick_info[3]
-        li_all_coords_studs = new_brick_info[4]
-        li_all_coords_tubes = new_brick_info[5]
+    brick_length = new_brick_info[0]
+    brick_width = new_brick_info[1]
+    li_all_coords_spaces = new_brick_info[3]
+    li_all_coords_studs = new_brick_info[4]
+    li_all_coords_tubes = new_brick_info[5]
+
+    if rotation % 4 == 0:
+        pass
+    if rotation % 4== 1:
         new_brick_info[3] = rotate_1(li_all_coords_spaces, brick_length)
         new_brick_info[4] = rotate_1(li_all_coords_studs, brick_length)
         new_brick_info[5] = rotate_1(li_all_coords_tubes, brick_length)
         new_brick_info[0] = brick_width
         new_brick_info[1] = brick_length
-        return new_brick_info
-    if rotation == 2:
-        pass
-    if rotation == 3:
-        pass
+    if rotation % 4 == 2:
+        new_brick_info[3] = rotate_2(li_all_coords_spaces, brick_length, brick_width)
+        new_brick_info[4] = rotate_2(li_all_coords_studs, brick_length, brick_width)
+        new_brick_info[5] = rotate_2(li_all_coords_tubes, brick_length, brick_width)
+    if rotation % 4 == 3:
+        new_brick_info[3] = rotate_3(li_all_coords_spaces, brick_width)
+        new_brick_info[4] = rotate_3(li_all_coords_studs, brick_width)
+        new_brick_info[5] = rotate_3(li_all_coords_tubes, brick_width)
+        new_brick_info[0] = brick_width
+        new_brick_info[1] = brick_length
+    return new_brick_info
 
 
 class Configuration:
@@ -158,12 +183,12 @@ if __name__ == '__main__':
     configuration = Configuration()
     initialize_lego_bricks_dict(configuration)
 
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 0], rotation=1))
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 1], rotation=1))
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 2], rotation=1))
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 4, 0], rotation=1))
-    print(configuration.place_in_studs(Brick(3023, "White", configuration), [0, 0, 3], rotation=1))
-    print(configuration.place_in_studs(Brick(3004, "White", configuration), [3, 2, 0], rotation=1))
+    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 0], rotation=0))
+    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 1], rotation=1))
+    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 2], rotation=2))
+    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 3], rotation=3))
+    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 4], rotation=2))
+    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 5], rotation=3))
 
     for key, value in configuration.occupied_space.items():
         print(key, value)
