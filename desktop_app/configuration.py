@@ -35,9 +35,7 @@ def rotate_our_coordinates(brick_db_info, rotation):
     li_all_coords_studs = new_brick_info[4]
     li_all_coords_tubes = new_brick_info[5]
 
-    if rotation % 4 == 0:
-        pass
-    if rotation % 4== 1:
+    if rotation % 4 == 1:
         new_brick_info[3] = rotate_1(li_all_coords_spaces, brick_length)
         new_brick_info[4] = rotate_1(li_all_coords_studs, brick_length)
         new_brick_info[5] = rotate_1(li_all_coords_tubes, brick_length)
@@ -53,6 +51,16 @@ def rotate_our_coordinates(brick_db_info, rotation):
         new_brick_info[5] = rotate_3(li_all_coords_tubes, brick_width)
         new_brick_info[0] = brick_width
         new_brick_info[1] = brick_length
+
+    return new_brick_info
+
+
+def calculates_coordinates_starting_from_the_beginning(brick_db_info, start_coordinates, rotation):
+    new_brick_info = rotate_our_coordinates(brick_db_info, rotation)
+    for i in [3, 4, 5]:
+        new_brick_info[i] = [(new_brick_info[i][j][0] + start_coordinates[0],
+                              new_brick_info[i][j][1] + start_coordinates[1],
+                              new_brick_info[i][j][2] + start_coordinates[2]) for j in range(len(new_brick_info[i]))]
     return new_brick_info
 
 
@@ -78,10 +86,7 @@ class Configuration:
         if self.lego_bricks[lego_brick.brick_id][1]:
             return False
 
-        # informatii despre piesa rotita
         our_piece_new_info = rotate_our_coordinates(self.db_brick_info[lego_brick.db_id], rotation)
-        # print(self.db_brick_info[lego_brick.db_id])
-        # print(our_piece_new_info)
 
         # se verifica daca coordonata de start e valabila
         has_at_least_one_stud = False
@@ -138,9 +143,69 @@ class Configuration:
             self.occupied_tubes[start_coordinates[2]].append(tube)
         return True
 
-    # functia asta pune obiectul in tuburile altui obiect
+    def get_studs_which_connects_tubes_for_piece(self, piece_info_in_space, id_piece, get_all_with_flag=0):
+        studs_list = []
+        for stud in piece_info_in_space[4]:
+            found = False
+            for tubes in self.occupied_tubes.values():
+                for x, y, z, id1, id2 in tubes:
+                    if stud[0] == x and stud[1] == y and stud[2] == z and (id2 == 0 or id1 == 0):
+                        id_existent_piece = max(id1, id2)
+                        studs_list.append([x, y, z, id_piece, id_existent_piece])
+                        found = True
+            if (not found) and get_all_with_flag == 1:
+                studs_list.append([stud[0], stud[1], stud[2], id_piece, 0])
+        return studs_list
+
+    # validare
+    def we_can_add_piece_to_existent_configuration(self, lego_brick, piece_info_in_space):
+        if self.lego_bricks[lego_brick.brick_id][1]:
+            return False
+
+        number_of_studs_that_connects_a_tube = len(self.get_studs_which_connects_tubes_for_piece(piece_info_in_space, lego_brick.brick_id))
+        if number_of_studs_that_connects_a_tube == 0:
+            return False
+
+        overlap_with_another_piece = False
+        for occupied_position_list_for_level in self.occupied_space.values():
+            for occupied_position in occupied_position_list_for_level:
+                if (occupied_position[0], occupied_position[1], occupied_position[2]) in piece_info_in_space[3]:
+                    overlap_with_another_piece = True
+        if overlap_with_another_piece:
+            return False
+        return True
+
+    # tranzitie
+    def add_piece_to_existent_configuration(self, lego_brick, start_coordinates, piece_info_in_space):
+        # lego_brick.rotation = rotation  # !!? HERE
+        self.lego_bricks[lego_brick.brick_id] = [self, True]
+        for space in piece_info_in_space[3]:
+            self.occupied_space[space[2]].append([space[0], space[1], space[2], lego_brick.brick_id])
+
+        print(piece_info_in_space[5])
+        for tube in piece_info_in_space[5]:
+            if tube[2] not in self.occupied_tubes:
+                self.occupied_tubes[tube[2]] = []
+            self.occupied_tubes[tube[2]].append([tube[0], tube[1], tube[2], lego_brick.brick_id, 0])
+
+        all_studs_with_connection_info = self.get_studs_which_connects_tubes_for_piece(piece_info_in_space, lego_brick.brick_id, 1)
+        print(all_studs_with_connection_info)
+        for tube in self.occupied_tubes[piece_info_in_space[2] + start_coordinates[2]]:
+            for stud in all_studs_with_connection_info:
+                if stud[0] == tube[0] and stud[1] == tube[1] and stud[2] == tube[2]:
+                    stud[4] = tube[3]
+                    tube[4] = lego_brick.brick_id
+        if start_coordinates[2] not in self.occupied_studs:
+            self.occupied_studs[start_coordinates[2]] = []
+        for stud in all_studs_with_connection_info:
+            self.occupied_studs[stud[2]].append(stud)
+
     def place_in_tubes(self, lego_brick, start_coordinates, rotation=0):
-        pass
+        piece_info_in_space = calculates_coordinates_starting_from_the_beginning(self.db_brick_info[lego_brick.db_id], start_coordinates, rotation)
+        if self.we_can_add_piece_to_existent_configuration(lego_brick, piece_info_in_space):
+            self.add_piece_to_existent_configuration(lego_brick, start_coordinates, piece_info_in_space)
+            return True
+        return False
 
     # flag-ul din dictionar se face fals, listele occupied_space, stud_coordinates, tube_coordinates primesc [] ca noua valoare
     # in functie de id-ul din stud_coordinates a piesei curente, se reseteaza flag-urile din tube_coordinates din piesele respective
@@ -179,23 +244,25 @@ def initialize_lego_bricks_dict(given_configuration):
     given_configuration.db_brick_info = db_brick_info
 
 
+def verificare():
+    print("******************SPACE**********************")
+    for key, value in configuration.occupied_space.items():
+        print(key, value)
+    print("******************STUDS**********************")
+    for key, value in configuration.occupied_studs.items():
+        print(key, value)
+    print("******************TUBES**********************")
+    for key, value in configuration.occupied_tubes.items():
+        print(key, value)
+
+
 if __name__ == '__main__':
     configuration = Configuration()
     initialize_lego_bricks_dict(configuration)
 
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 0], rotation=0))
-    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 1], rotation=1))
-    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 2], rotation=2))
-    print(configuration.place_in_studs(Brick(2420, "White", configuration), [0, 0, 3], rotation=3))
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 4], rotation=2))
-    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 5], rotation=3))
-
-    for key, value in configuration.occupied_space.items():
-        print(key, value)
-    print("\n")
-    for key, value in configuration.occupied_studs.items():
-        print(key, value)
-    print("\n")
-    for key, value in configuration.occupied_tubes.items():
-        print(key, value)
-    # TODO: metoda place_in_tubes + folosit rotation + decrementat inaltimea de la tubes pentru toate piesele
+    print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 0], rotation=1))
+    print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
+    print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 6], rotation=0))
+    # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
+    print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1))
+    print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
