@@ -1,13 +1,13 @@
 import sys
 import os, os.path
 import PIL.Image as Image
+from util import export, importFile, drawImage
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-imagePath = "../desktop_app/lego_pictures/"
 list_of_images_id = []
 dictionary_of_images_size = {}
 current_piece = ""
@@ -17,17 +17,6 @@ class AlignDelegate(QtWidgets.QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super(AlignDelegate, self).initStyleOption(option, index)
         option.displayAlignment = Qt.AlignCenter
-
-
-class ImgWidget(QWidget):
-
-    def __init__(self, parent=None):
-        super(ImgWidget, self).__init__(parent)
-        self.pic = QPixmap(imagePath)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.drawPixmap(0, 0, self.pic)
 
 
 class AddItemWindow(QWidget):
@@ -55,13 +44,9 @@ class AddItemWindow(QWidget):
         self.tab_layout.addLayout(self.color_layout)
         self.add_confirm_button()
 
-        try:
-            # quit(self.close_event_handler)
-            quit = QAction("Quit", self)
-            quit.triggered.connect(self.close)
+        quit = QAction("Quit", self)
+        quit.triggered.connect(self.close)
 
-        except Exception as e:
-            print(e)
         self.show()
 
     def add_title_label(self):
@@ -118,18 +103,18 @@ class AddItemWindow(QWidget):
         self.tab_layout.addWidget(self.confirm_button, alignment=Qt.AlignCenter)
 
     def confirm_functionality(self):
-        global imagePath, current_piece
+        current_piece
 
         if self.amount_line_edit.text() == '':
             self.error_label.setVisible(True)
         else:
-            path = imagePath
-            imagePath = imagePath + current_piece + ".png"
+            path = drawImage.imagePath
+            drawImage.imagePath = drawImage.imagePath + current_piece + ".png"
 
             row_position = mainWin.tableWidgetRight.rowCount()
             mainWin.tableWidgetRight.insertRow(row_position)
 
-            mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0, ImgWidget(self))
+            mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0, drawImage.ImgWidget(self))
             mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 1,
                                              QTableWidgetItem(current_piece))
             mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 2,
@@ -137,11 +122,11 @@ class AddItemWindow(QWidget):
             mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 3,
                                              QTableWidgetItem(self.color_box.currentText()))
 
-            image = Image.open(imagePath)
+            image = Image.open(drawImage.imagePath)
             width, height = image.size
             mainWin.tableWidgetRight.setRowHeight(mainWin.tableWidgetRight.rowCount() - 1, height)
 
-            imagePath = path
+            drawImage.imagePath = path
             mainWin.setEnabled(True)
 
             self.close()
@@ -267,10 +252,13 @@ class MainWindow(QWidget):
         self.tableWidgetRight.setColumnCount(4)
         self.tableWidgetRight.setColumnWidth(0, self.max_width)
         self.tableWidgetRight.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidgetRight.cellDoubleClicked.connect(self.cell_for_update_was_clicked)
         self.tableWidgetRight.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidgetRight.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
         self.tableWidgetRight.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
         self.tableWidgetRight.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
+        self.tableWidgetRight.rowCount()
+
 
         delegate = AlignDelegate(self.tableWidgetRight)
         self.tableWidgetRight.setItemDelegateForColumn(1, delegate)
@@ -285,26 +273,26 @@ class MainWindow(QWidget):
         self.tableWidget.setRowCount(self.row_count)
         self.tableWidget.setColumnCount(2)
 
-        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Imagine"))
+        self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidget.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
 
-        global imagePath
+
         global list_of_images_id
         self.max_width = 0
 
         for i in range(0, self.row_count):
-            path = imagePath
-            imagePath = imagePath + list_of_images_id[i]
+            path = drawImage.imagePath
+            drawImage.imagePath = drawImage.imagePath + list_of_images_id[i]
 
-            self.tableWidget.setCellWidget(i, 0, ImgWidget(self))
+            self.tableWidget.setCellWidget(i, 0, drawImage.ImgWidget(self))
             id_item = QTableWidgetItem(list_of_images_id[i])
             id_item.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(i, 1, id_item)
 
-            image = Image.open(imagePath + ".png")
+            image = Image.open(drawImage.imagePath + ".png")
             width, height = image.size
             self.tableWidget.setRowHeight(i, height)
-            imagePath = path
+            drawImage.imagePath = path
             if width > self.max_width:
                 self.max_width = width
 
@@ -319,20 +307,29 @@ class MainWindow(QWidget):
         print("Not implemented")
 
     def import_button_clicked(self):
-        print("Not implemented")
+        self.tableWidgetRight.setRowCount(0)
+        filename, _ = QFileDialog.getOpenFileName(filter='JSON(*.json)')
+        importFile.populate_table_from_file(filename, self.tableWidgetRight, self.max_width)
 
     def export_button_clicked(self):
-        print("Not implemented")
+        filename, _ = QFileDialog.getSaveFileName(filter='JSON(*.json)')
+        export.write_to_json_file(filename, self.tableWidgetRight)
 
     def cell_was_clicked(self, row, column):
         global current_piece
         current_piece = self.tableWidget.item(row, 1).text()
         self.tab = AddItemWindow()
-        # self.setWindowModality(Qt.ApplicationModal)
         self.setEnabled(False)
 
         self.tab.show()
 
+    def cell_for_update_was_clicked(self, row, column):
+        if column == 2:
+            try:
+                self.tableWidgetRight.setItem(row, column, QTableWidgetItem("250"))
+
+            except Exception as e:
+                print(e)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
