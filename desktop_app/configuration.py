@@ -1,4 +1,5 @@
 import os
+import re
 
 
 def rotate_1(li_coord, length):
@@ -67,6 +68,13 @@ def calculates_coordinates_starting_from_the_beginning(brick_db_info, start_coor
     return new_brick_info
 
 
+def str_to_bool(given_string):
+    if given_string == "True":
+        return True
+    elif given_string == "False":
+        return False
+
+
 class Configuration:
     def __init__(self):
         self.lego_bricks = dict()  # cheia va fi id-ul, valoarea va fi [obiect, is_used]; lista va contine toate piesele initializate
@@ -79,32 +87,80 @@ class Configuration:
         to_write = ""
         to_write += "lego_bricks\n"
         for key, value in self.lego_bricks.items():
-            to_write += str(key) + " " + str(value[0].db_id) + " " + str(value[0].color) + " " + str(value[1]) + "\n"
+            to_write += str(key) + ", " + str(value[0].db_id) + ", " + str(value[0].color) + ", " + str(value[1]) + "\n"
         to_write += "occupied_space\n"
         for key, value in self.occupied_space.items():
             if len(value) > 0:
-                to_write += str(key) + " "
+                to_write += str(key) + ", "
                 for val in value:
-                    to_write += str(val) + " "
+                    to_write += str(val) + ", "
+                to_write = to_write[:-2]
                 to_write += "\n"
         to_write += "occupied_studs\n"
         for key, value in self.occupied_studs.items():
             if len(value) > 0:
-                to_write += str(key) + " "
+                to_write += str(key) + ", "
                 for val in value:
-                    to_write += str(val) + " "
+                    to_write += str(val) + ", "
+                to_write = to_write[:-2]
                 to_write += "\n"
         to_write += "occupied_tubes\n"
         for key, value in self.occupied_tubes.items():
             if len(value) > 0:
-                to_write += str(key) + " "
+                to_write += str(key) + ", "
                 for val in value:
-                    to_write += str(val) + " "
+                    to_write += str(val) + ", "
+                to_write = to_write[:-2]
                 to_write += "\n"
         file_path = os.path.join("configurations", file_name)
         file = open(file_path, "w+")
         file.write(to_write)
         file.close()
+
+    def load_configuration(self, file_name):
+        self.lego_bricks = dict()
+        self.occupied_space = dict()
+        self.occupied_studs = dict()
+        self.occupied_tubes = dict()
+        file_path = os.path.join("configurations\\", file_name)
+        file = open(file_path, "r")
+        mode = 0
+        r = r"\[.+?\]"
+        for line in file.readlines():
+            line = line[:-1]
+            if line == "lego_bricks":
+                mode = 1
+            elif line == "occupied_space":
+                mode = 2
+            elif line == "occupied_studs":
+                mode = 3
+            elif line == "occupied_tubes":
+                mode = 4
+            elif mode == 1:
+                info = line.split(", ")
+                lego_brick = Brick(int(info[1]), info[2], self)
+                self.lego_bricks[int(info[0])][1] = str_to_bool(info[3])
+            elif mode == 2:
+                info = line.split(",")
+                self.occupied_space[int(info[0])] = []
+                res = re.findall(r, line)
+                for result in res:
+                    info2 = result.split(", ")
+                    self.occupied_space[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3][:-1])])
+            elif mode == 3:
+                info = line.split(",")
+                self.occupied_studs[int(info[0])] = []
+                res = re.findall(r, line)
+                for result in res:
+                    info2 = result.split(", ")
+                    self.occupied_studs[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+            elif mode == 4:
+                info = line.split(",")
+                self.occupied_tubes[int(info[0])] = []
+                res = re.findall(r, line)
+                for result in res:
+                    info2 = result.split(", ")
+                    self.occupied_tubes[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
 
     # functia asta pune obiectul peste alte obiecte (in studs)
     # piesa va fi pusa de la x la x + width, y la y + length, z la z + height
@@ -295,5 +351,8 @@ if __name__ == '__main__':
     # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
-    verificare()
+    # verificare()
     # configuration.save_configuration("test_config.txt")
+    test_config = Configuration()
+    test_config.load_configuration("test_config.txt")
+    test_config.save_configuration("test2_config.txt")
