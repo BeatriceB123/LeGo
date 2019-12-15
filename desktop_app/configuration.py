@@ -1,3 +1,6 @@
+import os
+
+
 def rotate_1(li_coord, length):
     new_li_coord = []
     for coords in li_coord:
@@ -72,6 +75,37 @@ class Configuration:
         self.occupied_tubes = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de tubes + id piesa + id piesa care ocupa
         self.db_brick_info = dict()  # cheia va fi id-ul din bd, valoarea va fi o lista de 3 elemente (lungime, latime, inaltime) si 3 liste: spaces, studs, tubes
 
+    def save_configuration(self, file_name):
+        to_write = ""
+        to_write += "lego_bricks\n"
+        for key, value in self.lego_bricks.items():
+            to_write += str(key) + " " + str(value[0].db_id) + " " + str(value[0].color) + " " + str(value[1]) + "\n"
+        to_write += "occupied_space\n"
+        for key, value in self.occupied_space.items():
+            if len(value) > 0:
+                to_write += str(key) + " "
+                for val in value:
+                    to_write += str(val) + " "
+                to_write += "\n"
+        to_write += "occupied_studs\n"
+        for key, value in self.occupied_studs.items():
+            if len(value) > 0:
+                to_write += str(key) + " "
+                for val in value:
+                    to_write += str(val) + " "
+                to_write += "\n"
+        to_write += "occupied_tubes\n"
+        for key, value in self.occupied_tubes.items():
+            if len(value) > 0:
+                to_write += str(key) + " "
+                for val in value:
+                    to_write += str(val) + " "
+                to_write += "\n"
+        file_path = os.path.join("configurations", file_name)
+        file = open(file_path, "w+")
+        file.write(to_write)
+        file.close()
+
     # functia asta pune obiectul peste alte obiecte (in studs)
     # piesa va fi pusa de la x la x + width, y la y + length, z la z + height
     def place_in_studs(self, lego_brick, start_coordinates, rotation=0):
@@ -122,8 +156,7 @@ class Configuration:
                     all_spaces_to_occupy.append(space)
 
         # daca s-a ajuns pana aici inseamna ca piesa va fi pusa
-        lego_brick.rotation = rotation  # !!?
-        self.lego_bricks[lego_brick.brick_id] = [self, True]
+        self.lego_bricks[lego_brick.brick_id] = [self.lego_bricks[lego_brick.brick_id][0], True]
         for space in all_spaces_to_occupy:
             self.occupied_space[space[2]].append(space)
         for stud in our_piece_new_info[4]:
@@ -177,8 +210,7 @@ class Configuration:
 
     # tranzitie
     def add_piece_to_existent_configuration(self, lego_brick, start_coordinates, piece_info_in_space):
-        # lego_brick.rotation = rotation  # !!? HERE
-        self.lego_bricks[lego_brick.brick_id] = [self, True]
+        self.lego_bricks[lego_brick.brick_id] = [self.lego_bricks[lego_brick.brick_id][0], True]
         for space in piece_info_in_space[3]:
             self.occupied_space[space[2]].append([space[0], space[1], space[2], lego_brick.brick_id])
 
@@ -224,9 +256,6 @@ class Brick:
         self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
         self.color = color
 
-        # urmatoarele atribute sunt folosite atunci cand piesa este pusa in alta piesa
-        self.rotation = 0  # 0 -> in dreapta, 1 -> in jos, 2 -> in stanga, 3 -> in sus
-
         given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
@@ -266,3 +295,5 @@ if __name__ == '__main__':
     # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
+    verificare()
+    # configuration.save_configuration("test_config.txt")
