@@ -5,6 +5,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+sys.path.append("..")
 from configuration import *
 from util import drawImage
 
@@ -14,7 +15,7 @@ add_draw_image = "..\\lego_pictures\\"
 
 
 class AddConfigurationScreen(QWidget):
-    configuration1 = Configuration()
+    configuration1 = Configuration(True)
 
     def __init__(self):
         super().__init__()

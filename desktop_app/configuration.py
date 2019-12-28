@@ -77,13 +77,14 @@ def str_to_bool(given_string):
 
 
 class Configuration:
-    def __init__(self):
+    def __init__(self, interface=False):
         self.lego_bricks = dict()  # cheia va fi id-ul, valoarea va fi [obiect, is_used]; lista va contine toate piesele initializate
         self.occupied_space = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de spatiu + id piesa (a cui este)
         self.occupied_studs = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de studs + id piesa + id piesa care ocupa
         self.occupied_tubes = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de tubes + id piesa + id piesa care ocupa
         self.db_brick_info = dict()  # cheia va fi id-ul din bd, valoarea va fi o lista de 3 elemente (lungime, latime, inaltime) si 3 liste: spaces, studs, tubes
         self.image = "configurations\\placeholder.jpg"
+        initialize_lego_bricks_dict(self, interface)
 
     def save_configuration(self, file_name):
         to_write = ""
@@ -364,8 +365,11 @@ class Brick:
         given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
-def initialize_lego_bricks_dict(given_configuration):
-    file_json = './lego_piece_info.json'
+def initialize_lego_bricks_dict(given_configuration, interface=False):
+    if interface:
+        file_json = '../lego_piece_info.json'
+    else:
+        file_json = './lego_piece_info.json'
     db_brick_info = dict()
     with open(file_json, 'rb') as data_file:
         import json
@@ -392,7 +396,7 @@ def verificare():
 
 if __name__ == '__main__':
     configuration = Configuration()
-    initialize_lego_bricks_dict(configuration)
+
 
     print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 0], rotation=1))
     print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
