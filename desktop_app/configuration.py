@@ -125,7 +125,7 @@ class Configuration:
     def save_configuration(self, file_name, interface=False):
         to_write = self.get_config_info()
         if interface:
-            file_path = os.path.join(".configurations", file_name)
+            file_path = os.path.join("..\\configurations", file_name)
         else:
             file_path = os.path.join("configurations", file_name)
         file = open(file_path, "w+")

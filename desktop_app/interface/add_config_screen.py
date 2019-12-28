@@ -1,3 +1,4 @@
+import shutil
 import sys
 
 import PIL.Image as Image
@@ -104,6 +105,11 @@ class AddConfigurationScreen(QWidget):
         self.add_status.resize(100, 30)
         self.add_status.setText("")
 
+        self.refresh_button = QPushButton("Refresh info", self)
+        self.refresh_button.move(400, 270)
+        self.refresh_button.resize(100, 30)
+        self.refresh_button.clicked.connect(self.refresh_button_clicked)
+
         self.id_config_label = QLabel(self)
         self.id_config_label.setText("ID config")
         self.id_config_label.move(50, 310)
@@ -124,22 +130,31 @@ class AddConfigurationScreen(QWidget):
         self.remove_status.setText("")
 
         self.select_path_label = QLabel(self)
-        self.select_path_label.move(50, 370)
+        self.select_path_label.move(20, 370)
         self.select_path_label.resize(140, 30)
         self.select_path_label.setText("Name/path to file")
 
         self.select_path_line = QLineEdit(self)
-        self.select_path_line.move(150, 370)
-        self.select_path_line.resize(200, 30)
+        self.select_path_line.move(110, 370)
+        self.select_path_line.resize(240, 30)
+        self.select_path_line.setEnabled(False)
 
         self.select_path_button = QPushButton("Choose config image", self)
         self.select_path_button.move(360, 370)
-        self.select_path_button.resize(120, 30)
+        self.select_path_button.resize(150, 30)
         self.select_path_button.clicked.connect(self.select_path_button_clicked)
+
+        self.finish_button = QPushButton("Finish", self)
+        self.finish_button.move(520, 370)
+        self.finish_button.resize(100, 30)
+        self.finish_button.clicked.connect(self.finish_button_clicked)
 
         self.creating_table()
 
         self.show()
+
+    def refresh_button_clicked(self):
+        self.configuration_information.setPlainText(self.configuration1.get_config_info())
 
     def creating_table(self):
         row_cnt = get_number_of_lines()
@@ -165,36 +180,66 @@ class AddConfigurationScreen(QWidget):
             self.help_table.setRowHeight(i, height)
 
     def select_path_button_clicked(self):
-        filename, _ = QFileDialog.getOpenFileName(filter='PNG(*.png)')
+        filename, _ = QFileDialog.getOpenFileName(filter='JPG(*.jpg)')
         if filename is not '':
             self.select_path_line.setText(filename)
 
     def add_button_stubs_clicked(self):
-        if self.x_line.text() == "" or \
-                self.y_line.text() == "" or \
-                self.z_line.text() == "":
-            print("Ok")
+        global list_of_images_id_add
+        if self.x_line.text() is not '' and \
+                self.y_line.text() is not '' and \
+                self.z_line.text() is not '' and \
+                self.id_db_line.text() is not '' and \
+                self.id_db_line.text() in list_of_images_id_add:
+            if self.configuration1.place_in_studs(
+                    Brick(int(self.id_db_line.text()), str(self.color_dropdown.currentText()), self.configuration1),
+                    [int(self.x_line.text()), int(self.y_line.text()), int(self.z_line.text())],
+                    rotation=int(self.rotaton.currentText())):
+                self.add_status.setText("Success")
+                self.configuration_information.setPlainText(self.configuration1.get_config_info())
+            else:
+                self.add_status.setText("Failed")
         else:
-            self.add_status.setText("Failled")
+            self.add_status.setText("Failed")
 
     def add_button_tubes_clicked(self):
-        # global configuration1
         global list_of_images_id_add
         if self.x_line.text() is not '' and \
                 self.y_line.text() is not '' and \
                 self.z_line.text() is not '' and \
                 self.id_db_line.text() is not '' and  \
                 self.id_db_line.text() in list_of_images_id_add:
-            print(int(self.id_db_line.text()), str(self.color_dropdown.currentText()), [int(self.x_line.text()), int(self.y_line.text()), int(self.z_line.text())], int(self.rotaton.currentText()))
             if self.configuration1.place_in_tubes(Brick(int(self.id_db_line.text()), str(self.color_dropdown.currentText()), self.configuration1), [int(self.x_line.text()), int(self.y_line.text()), int(self.z_line.text())], rotation=int(self.rotaton.currentText())):
-                self.add_status.setText("Succes")
+                self.add_status.setText("Success")
+                self.configuration_information.setPlainText(self.configuration1.get_config_info())
             else:
-                self.add_status.setText("Failled")
+                self.add_status.setText("Failed")
         else:
-            self.add_status.setText("Failled")
+            self.add_status.setText("Failed")
 
     def remove_button_clicked(self):
-        print("Ceva again")
+        global list_of_images_id_add
+        if self.id_config_line is not '':
+            if self.configuration1.remove_brick(int(self.id_config_line.text())):
+                self.remove_status.setText("Success")
+                self.configuration_information.setPlainText(self.configuration1.get_config_info())
+            else:
+                self.remove_status.setText("Failed")
+        else:
+            self.remove_status.setText("Failed")
+
+    def finish_button_clicked(self):
+        if self.select_path_line is not '' and \
+                len(self.configuration1.lego_bricks) > 0:
+            count = 0
+            for root, dirs, files in os.walk("..\\configurations\\"):
+                for i in files:
+                    if i.split(".")[1] == "txt":
+                        count += 1
+            new_file_name = str(count) + ".txt"
+            if self.configuration1.save_configuration(new_file_name, interface=True):
+                new_image_location = "..\\configurations"
+                shutil.copy(self.select_path_line.text(), new_image_location + "\\" + str(count) + ".jpg")
 
 
 def get_number_of_lines():
