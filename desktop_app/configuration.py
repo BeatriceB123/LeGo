@@ -122,12 +122,16 @@ class Configuration:
         to_write += image_path + "\n"
         return to_write
 
-    def save_configuration(self, file_name):
+    def save_configuration(self, file_name, interface=False):
         to_write = self.get_config_info()
-        file_path = os.path.join("configurations", file_name)
+        if interface:
+            file_path = os.path.join(".configurations", file_name)
+        else:
+            file_path = os.path.join("configurations", file_name)
         file = open(file_path, "w+")
         file.write(to_write)
         file.close()
+        return True
 
     def load_configuration(self, file_name):
         self.lego_bricks = dict()
@@ -336,7 +340,7 @@ class Configuration:
                 break
         if in_tubes and in_studs:
             return False
-        self.lego_bricks[config_id][1] = False
+        del self.lego_bricks[config_id]
         occupied_tubes_copy = copy.deepcopy(self.occupied_tubes)
         for key, value in occupied_tubes_copy.items():
             for tube in value:
@@ -390,6 +394,9 @@ def initialize_lego_bricks_dict(given_configuration, interface=False):
 
 
 def verificare():
+    print("******************BRICKS*********************")
+    for key, value in configuration.lego_bricks.items():
+        print(key, value)
     print("******************SPACE**********************")
     for key, value in configuration.occupied_space.items():
         print(key, value)
@@ -416,8 +423,5 @@ if __name__ == '__main__':
     test_config.load_configuration("test_config.txt")
     test_config.save_configuration("test2_config.txt")
     print(configuration.remove_brick(2))
-    print(configuration.lego_bricks[2])
-    print(configuration.remove_brick(2))
-    print(configuration.lego_bricks[2])
     # print("-------------AAAAAAAAAAAAA-------------")
-    # verificare()
+    verificare()
