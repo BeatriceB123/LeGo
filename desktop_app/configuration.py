@@ -69,13 +69,6 @@ def calculates_coordinates_starting_from_the_beginning(brick_db_info, start_coor
     return new_brick_info
 
 
-def str_to_bool(given_string):
-    if given_string == "True":
-        return True
-    elif given_string == "False":
-        return False
-
-
 class Configuration:
     def __init__(self, interface=False):
         self.lego_bricks = dict()  # cheia va fi id-ul, valoarea va fi [obiect, is_used]; lista va contine toate piesele initializate
@@ -90,8 +83,8 @@ class Configuration:
         to_write = ""
         to_write += "lego_bricks\n"
         for key, value in self.lego_bricks.items():
-            to_write += str(key) + ", " + str(value[0].db_id) + ", " + str(value[0].color) + ", " + str(
-                value[1]) + "\n"
+            if value[1]:
+                to_write += str(key) + ", " + str(value[0].db_id) + ", " + str(value[0].color) + "\n"
         to_write += "occupied_space\n"
         for key, value in self.occupied_space.items():
             if len(value) > 0:
@@ -158,7 +151,7 @@ class Configuration:
             elif mode == 1:
                 info = line.split(", ")
                 lego_brick = Brick(int(info[1]), info[2], self)
-                self.lego_bricks[int(info[0])][1] = str_to_bool(info[3])
+                self.lego_bricks[int(info[0])][1] = True
             elif mode == 2:
                 info = line.split(",")
                 self.occupied_space[int(info[0])] = []
@@ -340,7 +333,7 @@ class Configuration:
                 break
         if in_tubes and in_studs:
             return False
-        del self.lego_bricks[config_id]
+        self.lego_bricks[config_id][1] = False
         occupied_tubes_copy = copy.deepcopy(self.occupied_tubes)
         for key, value in occupied_tubes_copy.items():
             for tube in value:

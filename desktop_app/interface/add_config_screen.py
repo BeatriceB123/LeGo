@@ -240,6 +240,7 @@ class AddConfigurationScreen(QWidget):
             if self.configuration1.save_configuration(new_file_name, interface=True):
                 new_image_location = "..\\configurations"
                 shutil.copy(self.select_path_line.text(), new_image_location + "\\" + str(count) + ".jpg")
+                self.close()
 
 
 def get_number_of_lines():
