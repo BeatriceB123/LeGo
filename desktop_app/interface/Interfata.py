@@ -272,6 +272,7 @@ class MainWindow(QWidget):
         self.import_export_layout = QHBoxLayout()
         self.first_condition_line = QHBoxLayout()
         self.second_condition_line = QHBoxLayout()
+        self.configuration_generate_layout = QHBoxLayout()
 
         self.creating_tables()
         self.add_filter_label()
@@ -288,7 +289,8 @@ class MainWindow(QWidget):
         self.right_side_layout.addLayout(self.first_condition_line)
         self.add_second_condition_line()
         self.right_side_layout.addLayout(self.second_condition_line)
-        self.add_generate_button()
+        self.add_configurtion_generate_buttons()
+        self.right_side_layout.addLayout(self.configuration_generate_layout)
 
         self.left_side_filter_layout.setSpacing(0)
 
@@ -306,14 +308,22 @@ class MainWindow(QWidget):
         self.input.keyPressEvent = self.keyPressEvent
         self.left_side_filter_layout.addWidget(self.input, alignment=Qt.AlignLeft)
 
-    def add_generate_button(self):
+    def add_configurtion_generate_buttons(self):
+        self.button_configuration = QPushButton("Add Configuration", self)
+        self.button_configuration.setFixedHeight(40)
+        self.button_configuration.setFixedWidth(170)
+        self.button_configuration.setStyleSheet("background-color:#6e6e6e")
+        self.button_configuration.clicked.connect(self.configuration_button_clicked)
+
+        self.configuration_generate_layout.addWidget(self.button_configuration)
+
         self.button_generate = QPushButton("Generate", self)
         self.button_generate.setFixedHeight(40)
         self.button_generate.setFixedWidth(170)
         self.button_generate.setStyleSheet("background-color:#6e6e6e")
         self.button_generate.clicked.connect(self.generate_button_clicked)
 
-        self.right_side_layout.addWidget(self.button_generate, alignment=Qt.AlignCenter)
+        self.configuration_generate_layout.addWidget(self.button_generate)
 
     def add_second_condition_line(self):
         self.check_box = QCheckBox()
@@ -409,6 +419,9 @@ class MainWindow(QWidget):
         self.left_side_layout.addWidget(self.tableWidget)
 
     def generate_button_clicked(self):
+        print("Not implemented")
+
+    def configuration_button_clicked(self):
         print("Not implemented")
 
     def import_button_clicked(self):
