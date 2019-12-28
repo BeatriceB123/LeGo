@@ -1,3 +1,4 @@
+import copy
 import os
 import re
 
@@ -82,6 +83,7 @@ class Configuration:
         self.occupied_studs = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de studs + id piesa + id piesa care ocupa
         self.occupied_tubes = dict()  # cheia va fi inaltimea, valoarea va fi lista cu coordonate de tubes + id piesa + id piesa care ocupa
         self.db_brick_info = dict()  # cheia va fi id-ul din bd, valoarea va fi o lista de 3 elemente (lungime, latime, inaltime) si 3 liste: spaces, studs, tubes
+        self.image = "configurations\\placeholder.jpg"
 
     def save_configuration(self, file_name):
         to_write = ""
@@ -112,6 +114,10 @@ class Configuration:
                     to_write += str(val) + ", "
                 to_write = to_write[:-2]
                 to_write += "\n"
+        to_write += "image_path\n"
+        image_path = repr(self.image)[:-1]
+        image_path = image_path[1:]
+        to_write += image_path + "\n"
         file_path = os.path.join("configurations", file_name)
         file = open(file_path, "w+")
         file.write(to_write)
@@ -122,6 +128,7 @@ class Configuration:
         self.occupied_space = dict()
         self.occupied_studs = dict()
         self.occupied_tubes = dict()
+        self.image = "configurations\\placeholder.jpg"
         file_path = os.path.join("configurations\\", file_name)
         file = open(file_path, "r")
         mode = 0
@@ -136,6 +143,8 @@ class Configuration:
                 mode = 3
             elif line == "occupied_tubes":
                 mode = 4
+            elif line == "image_path":
+                mode = 5
             elif mode == 1:
                 info = line.split(", ")
                 lego_brick = Brick(int(info[1]), info[2], self)
@@ -161,6 +170,9 @@ class Configuration:
                 for result in res:
                     info2 = result.split(", ")
                     self.occupied_tubes[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+            elif mode == 5:
+                info = line.split("\\")
+                self.image = os.path.join("configurations", info[2])
 
     # functia asta pune obiectul peste alte obiecte (in studs)
     # piesa va fi pusa de la x la x + width, y la y + length, z la z + height
@@ -295,15 +307,52 @@ class Configuration:
             return True
         return False
 
-    # flag-ul din dictionar se face fals, listele occupied_space, stud_coordinates, tube_coordinates primesc [] ca noua valoare
-    # in functie de id-ul din stud_coordinates a piesei curente, se reseteaza flag-urile din tube_coordinates din piesele respective
-    def remove_from_studs(self):
-        pass
-
-    # flag-ul din dictionar se face fals, listele occupied_space, stud_coordinates, tube_coordinates primesc [] ca noua valoare
-    # in functie de id-ul din tube_coordinates a piesei curente, se reseteaza flag-urile din stud_coordinates din piesele respective
-    def remove_from_tubes(self):
-        pass
+    # se va incerca scoaterea piesei date din configuratie, flag-urile si dictionarele updatandu-se corespunzator
+    def remove_brick(self, config_id):
+        if config_id not in self.lego_bricks.keys():
+            return False
+        in_tubes, in_studs = False, False
+        for key, value in self.occupied_tubes.items():
+            for tube in value:
+                if tube[4] == config_id:
+                    in_tubes = True
+                    break
+            if in_tubes:
+                break
+        for key, value in self.occupied_studs.items():
+            for stud in value:
+                if stud[4] == config_id:
+                    in_studs = True
+                    break
+            if in_studs:
+                break
+        if in_tubes and in_studs:
+            return False
+        self.lego_bricks[config_id][1] = False
+        occupied_tubes_copy = copy.deepcopy(self.occupied_tubes)
+        for key, value in occupied_tubes_copy.items():
+            for tube in value:
+                if tube[3] == config_id:
+                    self.occupied_tubes[key].remove(tube)
+        for key, value in self.occupied_tubes.items():
+            for tube in value:
+                if tube[4] == config_id:
+                    tube[4] = 0
+        occupied_studs_copy = copy.deepcopy(self.occupied_studs)
+        for key, value in occupied_studs_copy.items():
+            for stud in value:
+                if stud[3] == config_id:
+                    self.occupied_studs[key].remove(stud)
+        for key, value in self.occupied_studs.items():
+            for stud in value:
+                if stud[4] == config_id:
+                    stud[4] = 0
+        occupied_space_copy = copy.deepcopy(self.occupied_space)
+        for key, value in occupied_space_copy.items():
+            for space in value:
+                if space[3] == config_id:
+                    self.occupied_space[key].remove(space)
+        return True
 
 
 class Brick:
@@ -353,6 +402,10 @@ if __name__ == '__main__':
     print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
     # verificare()
     # configuration.save_configuration("test_config.txt")
-    test_config = Configuration()
-    test_config.load_configuration("test_config.txt")
-    test_config.save_configuration("test2_config.txt")
+    # test_config = Configuration()
+    # test_config.load_configuration("test_config.txt")
+    # test_config.save_configuration("test2_config.txt")
+    # print(configuration.remove_brick(3))
+    # print(configuration.lego_bricks[3])
+    # print("-------------AAAAAAAAAAAAA-------------")
+    # verificare()
