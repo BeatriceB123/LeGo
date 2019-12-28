@@ -1,7 +1,7 @@
 import sys
 import os, os.path
 import PIL.Image as Image
-from util import export, importFile, drawImage
+from desktop_app.util import export, importFile, drawImage
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
@@ -11,6 +11,7 @@ from PyQt5.QtGui import *
 list_of_images_id = []
 dictionary_of_images_size = {}
 current_piece = ""
+current_row = 0
 
 
 class AlignDelegate(QtWidgets.QStyledItemDelegate):
@@ -105,7 +106,7 @@ class AddItemWindow(QWidget):
     def confirm_functionality(self):
         current_piece
 
-        if self.amount_line_edit.text() == '':
+        if self.amount_line_edit.text() == '' or self.amount_line_edit.text() == '0' or self.amount_line_edit.text() == '-':
             self.error_label.setVisible(True)
         else:
             path = drawImage.imagePath
@@ -114,7 +115,8 @@ class AddItemWindow(QWidget):
             row_position = mainWin.tableWidgetRight.rowCount()
             mainWin.tableWidgetRight.insertRow(row_position)
 
-            mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0, drawImage.ImgWidget(self))
+            mainWin.tableWidgetRight.setCellWidget(mainWin.tableWidgetRight.rowCount() - 1, 0,
+                                                   drawImage.ImgWidget(self))
             mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 1,
                                              QTableWidgetItem(current_piece))
             mainWin.tableWidgetRight.setItem(mainWin.tableWidgetRight.rowCount() - 1, 2,
@@ -130,6 +132,110 @@ class AddItemWindow(QWidget):
             mainWin.setEnabled(True)
 
             self.close()
+
+    def closeEvent(self, event):
+        mainWin.setEnabled(True)
+        event.accept()
+
+
+class UpdateItemWindow(QWidget):
+    def __init__(self, parent=None):
+        super(UpdateItemWindow, self).__init__(parent)
+        self.setFixedWidth(400)
+        self.setFixedHeight(250)
+        self.setWindowTitle("Update piece")
+        self.move(700, 300)
+        self.init_UI()
+
+    def init_UI(self):
+        self.tab_layout = QVBoxLayout()
+        self.amount_layout = QHBoxLayout()
+        self.color_layout = QHBoxLayout()
+        self.buttons_layout = QHBoxLayout()
+        self.setLayout(self.tab_layout)
+
+        self.add_title_label()
+        self.add_error_label()
+        self.add_id_line()
+        self.add_amount_line()
+        self.tab_layout.addLayout(self.amount_layout)
+        self.add_color_line()
+        self.tab_layout.addLayout(self.color_layout)
+        self.add_buttons()
+        self.tab_layout.addLayout(self.buttons_layout)
+
+    def add_title_label(self):
+        self.label = QLabel()
+        self.label.setText("Update or delete a brick")
+        self.label.setStyleSheet("font-weight: bold; font-size: 20px;")
+
+        self.tab_layout.addWidget(self.label, alignment=Qt.AlignCenter)
+
+    def add_error_label(self):
+        self.error_label = QLabel()
+        self.error_label.setText("Give a valid amount of bricks")
+        self.error_label.setStyleSheet("color:red; font-weight: bold; font-size: 15px;")
+        self.error_label.setVisible(False)
+
+        self.tab_layout.addWidget(self.error_label, alignment=Qt.AlignCenter)
+
+    def add_id_line(self):
+        self.id_line = QLabel()
+        self.id_line.setText("ID piesa: " + current_piece)
+        self.tab_layout.addWidget(self.id_line, alignment=Qt.AlignCenter)
+
+    def add_amount_line(self):
+        self.amount_label = QLabel()
+        self.amount_label.setText("Number of bricks: ")
+
+        self.amount_layout.addWidget(self.amount_label)
+
+        self.amount_line_edit = QLineEdit()
+        self.amount_line_edit.setValidator(QIntValidator())
+
+        self.amount_layout.addWidget(self.amount_line_edit)
+
+    def add_color_line(self):
+        self.color_label = QLabel()
+        self.color_label.setText("Choose color")
+
+        self.color_layout.addWidget(self.color_label)
+
+        self.color_box = QComboBox()
+        self.color_box.addItem("Blue")
+        self.color_box.addItem("Red")
+        self.color_box.addItem("Green")
+
+        self.color_layout.addWidget(self.color_box)
+
+    def add_buttons(self):
+        self.delete_button = QPushButton()
+        self.delete_button.setText("Delete")
+        self.delete_button.clicked.connect(self.delete_functionality)
+        self.buttons_layout.addWidget(self.delete_button)
+
+        self.update_button = QPushButton()
+        self.update_button.setText("Update")
+        self.update_button.clicked.connect(self.update_functionality)
+        self.buttons_layout.addWidget(self.update_button)
+
+    def update_functionality(self):
+        global current_row
+        if self.amount_line_edit.text() == '' or self.amount_line_edit.text() == '0' or self.amount_line_edit.text() == '-':
+            self.error_label.setVisible(True)
+        else:
+            mainWin.tableWidgetRight.setItem(current_row, 2, QTableWidgetItem(self.amount_line_edit.text()))
+            mainWin.tableWidgetRight.setItem(current_row, 3, QTableWidgetItem(self.color_box.currentText()))
+            mainWin.setEnabled(True)
+
+            self.close()
+
+
+    def delete_functionality(self):
+        global current_row
+        mainWin.tableWidgetRight.removeRow(current_row)
+        mainWin.setEnabled(True)
+        self.close()
 
     def closeEvent(self, event):
         mainWin.setEnabled(True)
@@ -166,6 +272,7 @@ class MainWindow(QWidget):
         self.import_export_layout = QHBoxLayout()
         self.first_condition_line = QHBoxLayout()
         self.second_condition_line = QHBoxLayout()
+        self.configuration_generate_layout = QHBoxLayout()
 
         self.creating_tables()
         self.add_filter_label()
@@ -182,7 +289,8 @@ class MainWindow(QWidget):
         self.right_side_layout.addLayout(self.first_condition_line)
         self.add_second_condition_line()
         self.right_side_layout.addLayout(self.second_condition_line)
-        self.add_generate_button()
+        self.add_configurtion_generate_buttons()
+        self.right_side_layout.addLayout(self.configuration_generate_layout)
 
         self.left_side_filter_layout.setSpacing(0)
 
@@ -197,16 +305,25 @@ class MainWindow(QWidget):
         self.input = QLineEdit()
         self.input.setFixedWidth(200)
         self.input.setValidator(QIntValidator())
+        self.input.keyPressEvent = self.keyPressEvent
         self.left_side_filter_layout.addWidget(self.input, alignment=Qt.AlignLeft)
 
-    def add_generate_button(self):
+    def add_configurtion_generate_buttons(self):
+        self.button_configuration = QPushButton("Add Configuration", self)
+        self.button_configuration.setFixedHeight(40)
+        self.button_configuration.setFixedWidth(170)
+        self.button_configuration.setStyleSheet("background-color:#6e6e6e")
+        self.button_configuration.clicked.connect(self.configuration_button_clicked)
+
+        self.configuration_generate_layout.addWidget(self.button_configuration)
+
         self.button_generate = QPushButton("Generate", self)
         self.button_generate.setFixedHeight(40)
         self.button_generate.setFixedWidth(170)
         self.button_generate.setStyleSheet("background-color:#6e6e6e")
         self.button_generate.clicked.connect(self.generate_button_clicked)
 
-        self.right_side_layout.addWidget(self.button_generate, alignment=Qt.AlignCenter)
+        self.configuration_generate_layout.addWidget(self.button_generate)
 
     def add_second_condition_line(self):
         self.check_box = QCheckBox()
@@ -259,7 +376,6 @@ class MainWindow(QWidget):
         self.tableWidgetRight.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
         self.tableWidgetRight.rowCount()
 
-
         delegate = AlignDelegate(self.tableWidgetRight)
         self.tableWidgetRight.setItemDelegateForColumn(1, delegate)
         self.tableWidgetRight.setItemDelegateForColumn(2, delegate)
@@ -275,7 +391,6 @@ class MainWindow(QWidget):
 
         self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidget.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
-
 
         global list_of_images_id
         self.max_width = 0
@@ -306,14 +421,19 @@ class MainWindow(QWidget):
     def generate_button_clicked(self):
         print("Not implemented")
 
+    def configuration_button_clicked(self):
+        print("Not implemented")
+
     def import_button_clicked(self):
         self.tableWidgetRight.setRowCount(0)
         filename, _ = QFileDialog.getOpenFileName(filter='JSON(*.json)')
-        importFile.populate_table_from_file(filename, self.tableWidgetRight, self.max_width)
+        if filename is not '':
+            importFile.populate_table_from_file(filename, self.tableWidgetRight, self.max_width)
 
     def export_button_clicked(self):
         filename, _ = QFileDialog.getSaveFileName(filter='JSON(*.json)')
-        export.write_to_json_file(filename, self.tableWidgetRight)
+        if filename is not '':
+            export.write_to_json_file(filename, self.tableWidgetRight)
 
     def cell_was_clicked(self, row, column):
         global current_piece
@@ -324,12 +444,27 @@ class MainWindow(QWidget):
         self.tab.show()
 
     def cell_for_update_was_clicked(self, row, column):
-        if column == 2:
-            try:
-                self.tableWidgetRight.setItem(row, column, QTableWidgetItem("250"))
+        global current_piece
+        global current_row
+        current_piece = self.tableWidgetRight.item(row, 1).text()
+        current_row = row
+        self.tab = UpdateItemWindow()
+        self.setEnabled(False)
 
-            except Exception as e:
-                print(e)
+        self.tab.show()
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Backspace:
+            self.input.setText(self.input.text()[:-1])
+        else:
+            self.input.setText(self.input.text() + e.text())
+        for index in range(0, self.tableWidget.rowCount()):
+            if self.tableWidget.item(index, 1).text().startswith(self.input.text()):
+                self.tableWidget.setRowHidden(index, False)
+            else:
+                self.tableWidget.setRowHidden(index, True)
+
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
