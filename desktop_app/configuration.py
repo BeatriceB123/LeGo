@@ -86,11 +86,12 @@ class Configuration:
         self.image = "configurations\\placeholder.jpg"
         initialize_lego_bricks_dict(self, interface)
 
-    def save_configuration(self, file_name):
+    def get_config_info(self):
         to_write = ""
         to_write += "lego_bricks\n"
         for key, value in self.lego_bricks.items():
-            to_write += str(key) + ", " + str(value[0].db_id) + ", " + str(value[0].color) + ", " + str(value[1]) + "\n"
+            to_write += str(key) + ", " + str(value[0].db_id) + ", " + str(value[0].color) + ", " + str(
+                value[1]) + "\n"
         to_write += "occupied_space\n"
         for key, value in self.occupied_space.items():
             if len(value) > 0:
@@ -119,6 +120,10 @@ class Configuration:
         image_path = repr(self.image)[:-1]
         image_path = image_path[1:]
         to_write += image_path + "\n"
+        return to_write
+
+    def save_configuration(self, file_name):
+        to_write = self.get_config_info()
         file_path = os.path.join("configurations", file_name)
         file = open(file_path, "w+")
         file.write(to_write)
@@ -312,6 +317,8 @@ class Configuration:
     def remove_brick(self, config_id):
         if config_id not in self.lego_bricks.keys():
             return False
+        if not self.lego_bricks[config_id][1]:
+            return False
         in_tubes, in_studs = False, False
         for key, value in self.occupied_tubes.items():
             for tube in value:
@@ -359,7 +366,7 @@ class Configuration:
 class Brick:
     def __init__(self, db_id, color, given_configuration):
         self.db_id = db_id
-        self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+        self.brick_id = len(given_configuration.lego_bricks)  # cheia pentru dictionarul _lego_bricks
         self.color = color
 
         given_configuration.lego_bricks[self.brick_id] = [self, False]
@@ -397,7 +404,6 @@ def verificare():
 if __name__ == '__main__':
     configuration = Configuration()
 
-
     print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 0], rotation=1))
     print(configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
     print(configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 6], rotation=0))
@@ -405,11 +411,13 @@ if __name__ == '__main__':
     print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
     # verificare()
-    # configuration.save_configuration("test_config.txt")
-    # test_config = Configuration()
-    # test_config.load_configuration("test_config.txt")
-    # test_config.save_configuration("test2_config.txt")
-    # print(configuration.remove_brick(3))
-    # print(configuration.lego_bricks[3])
+    configuration.save_configuration("test_config.txt")
+    test_config = Configuration()
+    test_config.load_configuration("test_config.txt")
+    test_config.save_configuration("test2_config.txt")
+    print(configuration.remove_brick(2))
+    print(configuration.lego_bricks[2])
+    print(configuration.remove_brick(2))
+    print(configuration.lego_bricks[2])
     # print("-------------AAAAAAAAAAAAA-------------")
     # verificare()
