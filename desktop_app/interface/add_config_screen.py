@@ -6,6 +6,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.uic.properties import QtGui
+
 sys.path.append("..")
 from configuration import *
 from util import drawImage
@@ -165,6 +167,7 @@ class AddConfigurationScreen(QWidget):
         self.help_table.setColumnCount(2)
         self.help_table.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
         self.help_table.setHorizontalHeaderItem(1, QTableWidgetItem("Image"))
+        self.help_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         for i in range(0, row_cnt):
             aux = add_draw_image + list_of_images_id_add[i]
@@ -183,6 +186,7 @@ class AddConfigurationScreen(QWidget):
         filename, _ = QFileDialog.getOpenFileName(filter='JPG(*.jpg)')
         if filename is not '':
             self.select_path_line.setText(filename)
+
 
     def add_button_stubs_clicked(self):
         global list_of_images_id_add
@@ -240,7 +244,7 @@ class AddConfigurationScreen(QWidget):
             if self.configuration1.save_configuration(new_file_name, interface=True):
                 new_image_location = "..\\configurations"
                 shutil.copy(self.select_path_line.text(), new_image_location + "\\" + str(count) + ".jpg")
-
+                self.close()
 
 def get_number_of_lines():
     global list_of_images_id_add
