@@ -165,6 +165,7 @@ class AddConfigurationScreen(QWidget):
         self.help_table.setColumnCount(2)
         self.help_table.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
         self.help_table.setHorizontalHeaderItem(1, QTableWidgetItem("Image"))
+        self.help_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         for i in range(0, row_cnt):
             aux = add_draw_image + list_of_images_id_add[i]
@@ -183,9 +184,6 @@ class AddConfigurationScreen(QWidget):
         filename, _ = QFileDialog.getOpenFileName(filter='JPG(*.jpg)')
         if filename is not '':
             self.select_path_line.setText(filename)
-
-    def click_t(self):
-        pass
 
     def add_button_stubs_clicked(self):
         global list_of_images_id_add
