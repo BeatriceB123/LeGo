@@ -7,8 +7,9 @@ def import_from_image():
     data['piece-list'].append(create_dict_for_json(2431, 1, 4, 1, flag=False))
     data['piece-list'].append(create_3039())
     data['piece-list'].append(create_3040())
-    data['piece-list'].append(create_dict_for_json(3068, 2, 2, 1, flag=False))
+    data['piece-list'].append(create_dict_for_json(3062, 1, 1, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3069, 1, 2, 1, flag=False))
+    data['piece-list'].append(create_dict_for_json(3068, 2, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3070, 1, 1, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3260, 1, 8, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3622, 1, 3, 3, flag=True))
@@ -17,7 +18,10 @@ def import_from_image():
     data['piece-list'].append(create_dict_for_json(3666, 1, 6, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3710, 1, 4, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3795, 2, 6, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3941, 2, 2, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3958, 6, 6, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(4073, 1, 1, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(4150, 2, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(4162, 1, 8, 1, flag=False))
     data['piece-list'].append(create_4286())
     data['piece-list'].append(create_dict_for_json(4477, 1, 10, 1, flag=True))
@@ -31,7 +35,7 @@ def import_from_image():
     for i in data['piece-list']:
         print(i)
 
-    with open('test_export.json', 'w') as to_write:
+    with open('..\\lego_piece_info.json', 'w') as to_write:
         json.dump(data, to_write, indent=4)
 
 
