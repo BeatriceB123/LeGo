@@ -4,6 +4,9 @@ import json
 def import_from_image():
     with open("../lego_piece_info.json") as data_file:
         data = json.load(data_file)
+    data['piece-list'].append(create_dict_for_json(2431, 1, 4, 1, flag=False))
+    data['piece-list'].append(create_3039())
+    data['piece-list'].append(create_3040())
     data['piece-list'].append(create_dict_for_json(3068, 2, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3069, 1, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3070, 1, 1, 1, flag=False))
@@ -16,6 +19,7 @@ def import_from_image():
     data['piece-list'].append(create_dict_for_json(3795, 2, 6, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3958, 6, 6, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(4162, 1, 8, 1, flag=False))
+    data['piece-list'].append(create_4286())
     data['piece-list'].append(create_dict_for_json(4477, 1, 10, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(6636, 1, 6, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(41539, 8, 8, 1, flag=True))
@@ -113,6 +117,69 @@ def create_dict_for_json(id, length, width, height, flag=True):
                 if k == height - 1 and flag is True:
                     piece['studs'].append([i, j, height + 1])
             piece['tubes'].append([i, j, 0])
+    return piece
+
+
+def create_4286():
+    piece = dict()
+    piece['id'] = 4286
+    piece['length'] = 1
+    piece['width'] = 3
+    piece['height'] = 3
+    piece['space'] = [
+        [0, 0, 0], [0, 1, 0], [0, 2, 0],
+        [0, 1, 1], [0, 2, 1],
+        [0, 2, 2]
+    ]
+    piece['studs'] = [
+        [0, 2, 3]
+    ]
+    piece['tubes'] =[
+        [0, 0, 0], [0, 1, 0], [0, 2, 0]
+    ]
+    piece['image-path'] = "./lego_pictures/" + str(4286)
+    return piece
+
+
+def create_3039():
+    piece = dict()
+    piece['id'] = 3039
+    piece['length'] = 2
+    piece['width'] = 2
+    piece['height'] = 3
+    piece['space'] = [
+        [0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0],
+        [0, 0, 1], [0, 1, 1], [1, 0, 1], [1, 1, 1],
+        [0, 1, 2], [1, 1, 2]
+    ]
+    piece['studs'] = [
+        [0, 1, 3], [1, 1, 3]
+    ]
+    piece['tubes'] = [
+        [0, 0, 0], [0, 1, 0], [1, 0, 0], [1, 1, 0]
+    ]
+    piece['image-path'] = "./lego_pictures/" + str(3039)
+    return piece
+
+
+def create_3040():
+    piece = dict()
+    piece['id'] = 3040
+    piece['length'] = 1
+    piece['width'] = 2
+    piece['height'] = 3
+    piece['space'] = [
+        [0, 0, 0], [0, 1, 0],
+        [0, 0, 1], [0, 1, 1],
+        [0, 1, 2]
+    ]
+    piece['studs'] = [
+        [0, 1, 3]
+    ]
+    piece['tubes'] = [
+        [0, 0, 0], [0, 1, 0]
+    ]
+    piece['image-path'] = "./lego_pictures/" + str(3040)
     return piece
 
 
