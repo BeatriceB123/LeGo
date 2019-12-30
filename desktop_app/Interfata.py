@@ -134,7 +134,7 @@ class AddItemWindow(QWidget):
 def get_number_of_lines():
     global list_of_images_id
     count = 0
-    for root, dirs, files in os.walk("../desktop_app/lego_pictures"):
+    for root, dirs, files in os.walk("..\lego_pictures"):
         for i in files:
             if i.split(".")[1] == "png":
                 list_of_images_id.append(i.split(".")[0])
@@ -302,6 +302,30 @@ class MainWindow(QWidget):
         self.tab = AddItemWindow()
         self.tab.show()
 
+<<<<<<< Updated upstream:desktop_app/Interfata.py
+=======
+    def cell_for_update_was_clicked(self, row, column):
+        global current_piece
+        global current_row
+        current_piece = self.tableWidgetRight.item(row, 1).text()
+        current_row = row
+        self.tab = UpdateItemWindow()
+        self.setEnabled(False)
+
+        self.tab.show()
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Backspace:
+            self.input.setText(self.input.text()[:-1])
+        else:
+            self.input.setText(self.input.text() + e.text())
+        for index in range(0, self.tableWidget.rowCount()):
+            if self.tableWidget.item(index, 1).text().startswith(self.input.text()):
+                self.tableWidget.setRowHidden(index, False)
+            else:
+                self.tableWidget.setRowHidden(index, True)
+
+>>>>>>> Stashed changes:desktop_app/interface/Interfata.py
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
