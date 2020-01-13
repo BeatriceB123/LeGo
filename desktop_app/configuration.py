@@ -285,14 +285,14 @@ class Configuration:
         for space in piece_info_in_space[3]:
             self.occupied_space[space[2]].append([space[0], space[1], space[2], lego_brick.brick_id])
 
-        print(piece_info_in_space[5])
+        # print(piece_info_in_space[5])
         for tube in piece_info_in_space[5]:
             if tube[2] not in self.occupied_tubes:
                 self.occupied_tubes[tube[2]] = []
             self.occupied_tubes[tube[2]].append([tube[0], tube[1], tube[2], lego_brick.brick_id, 0])
 
         all_studs_with_connection_info = self.get_studs_which_connects_tubes_for_piece(piece_info_in_space, lego_brick.brick_id, 1)
-        print(all_studs_with_connection_info)
+        # print(all_studs_with_connection_info)
         for tube in self.occupied_tubes[piece_info_in_space[2] + start_coordinates[2]]:
             for stud in all_studs_with_connection_info:
                 if stud[0] == tube[0] and stud[1] == tube[1] and stud[2] == tube[2]:
@@ -363,10 +363,11 @@ class Configuration:
 class Brick:
     def __init__(self, db_id, color, given_configuration):
         self.db_id = db_id
-        self.brick_id = len(given_configuration.lego_bricks)  # cheia pentru dictionarul _lego_bricks
         self.color = color
 
-        given_configuration.lego_bricks[self.brick_id] = [self, False]
+        if given_configuration is not None:
+            self.brick_id = len(given_configuration.lego_bricks)  # cheia pentru dictionarul _lego_bricks
+            given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
 def initialize_lego_bricks_dict(given_configuration, interface=False):
@@ -410,11 +411,13 @@ if __name__ == '__main__':
     # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1))
     print(configuration.place_in_tubes(Brick(3020, "White", configuration), [3, 3, 2], rotation=0))
+    for element, val in configuration.db_brick_info.items():
+        print(element, val)
     # verificare()
-    configuration.save_configuration("test_config.txt")
-    test_config = Configuration()
-    test_config.load_configuration("test_config.txt")
-    test_config.save_configuration("test2_config.txt")
-    print(configuration.remove_brick(2))
+    # configuration.save_configuration("test_config.txt")
+    # test_config = Configuration()
+    # test_config.load_configuration("test_config.txt")
+    # test_config.save_configuration("test2_config.txt")
+    # print(configuration.remove_brick(2))
     # print("-------------AAAAAAAAAAAAA-------------")
     verificare()
