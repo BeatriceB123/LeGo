@@ -2,19 +2,43 @@ import json
 
 
 def import_from_image():
-    with open("../lego_piece_info.json") as data_file:
-        data = json.load(data_file)
+    data = dict()
+    data['type'] = "brick"
+    data['piece-list'] = []
+    # with open("../lego_piece_info.json") as data_file:
+    #     data = json.load(data_file)
+    data['piece-list'].append(create_l_2x2(2357, 2, 2, 3))
+    data['piece-list'].append(create_l_2x2(2420, 2, 2, 1))
     data['piece-list'].append(create_dict_for_json(2431, 1, 4, 1, flag=False))
+    data['piece-list'].append(create_dict_for_json(2445, 2, 12, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(2456, 2, 6, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3002, 2, 3, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3003, 2, 2, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3004, 1, 2, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3005, 1, 1, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3008, 1, 8, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3009, 1, 6, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3010, 1, 3, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3020, 2, 4, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3021, 2, 3, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3022, 2, 2, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3023, 1, 2, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3024, 1, 1, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3031, 4, 4, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3032, 4, 6, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3033, 6, 10, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3034, 2, 8, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3035, 4, 8, 1, flag=True))
+    data['piece-list'].append(create_dict_for_json(3036, 6, 8, 1, flag=True))
     data['piece-list'].append(create_3039())
     data['piece-list'].append(create_3040())
     data['piece-list'].append(create_dict_for_json(3062, 1, 1, 3, flag=True))
-    data['piece-list'].append(create_dict_for_json(3069, 1, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3068, 2, 2, 1, flag=False))
+    data['piece-list'].append(create_dict_for_json(3069, 1, 2, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3070, 1, 1, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(3260, 1, 8, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3622, 1, 3, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3623, 1, 3, 1, flag=True))
-    data['piece-list'].append(create_dict_for_json(3260, 1, 8, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3666, 1, 6, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3710, 1, 4, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3795, 2, 6, 1, flag=True))
@@ -35,7 +59,7 @@ def import_from_image():
     for i in data['piece-list']:
         print(i)
 
-    with open('..\\lego_piece_info.json', 'w') as to_write:
+    with open('../lego_piece_info.json', 'w') as to_write:
         json.dump(data, to_write, indent=4)
 
 
@@ -112,14 +136,14 @@ def create_dict_for_json(id, length, width, height, flag=True):
     piece['height'] = height
     piece['space'] = []
     piece['studs'] = []
-    piece['tubes'] =[]
+    piece['tubes'] = []
     piece['image-path'] = "./lego_pictures/" + str(id)
     for i in range(0, length):
         for j in range(0, width):
             for k in range(0, height):
                 piece['space'].append([i, j, k])
                 if k == height - 1 and flag is True:
-                    piece['studs'].append([i, j, height + 1])
+                    piece['studs'].append([i, j, height])
             piece['tubes'].append([i, j, 0])
     return piece
 
@@ -187,5 +211,35 @@ def create_3040():
     return piece
 
 
+def create_l_2x2(id, length, width, height):
+    piece = dict()
+    piece['id'] = id
+    piece['length'] = length
+    piece['width'] = width
+    piece['height'] = height
+    piece['space'] = []
+    piece['studs'] = []
+    piece['tubes'] = []
+    piece['image-path'] = "./lego_pictures/" + str(id)
+    for i in range(0, length):
+        for j in range(0, width):
+            for k in range(0, height):
+                piece['space'].append([i, j, k])
+                if k == height - 1:
+                    piece['studs'].append([i, j, height])
+            piece['tubes'].append([i, j, 0])
+        if i == length - 1:
+            break
+    for t in range(0, height):
+        piece['space'].append([length - 1, width - 1, t])
+        if t == height - 1:
+            piece['studs'].append([length - 1, width - 1, height])
+    piece['tubes'].append([length - 1, width - 1, 0])
+    return piece
+
+
 if __name__ == '__main__':
     import_from_image()
+    with open("../lego_piece_info.json") as data_file:
+        data = json.load(data_file)
+    print(len(data['piece-list']))
