@@ -374,8 +374,7 @@ class Configuration:
         for coord_stud in piece_info_in_space[4]:
             h = coord_stud[2]
             if h in self.occupied_studs:
-                if [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 0] not in self.occupied_studs[h]\
-                        and [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 1] not in self.occupied_studs[h]:
+                if [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, ID_EXCEP] not in self.occupied_studs[h]:
                     return False
             else:
                 return False
@@ -390,41 +389,75 @@ class Configuration:
 
         return True
 
+    def get_neighbour_stud_id_for_given_tube(self, tube_coord):
+        h = tube_coord[2]
+        if len(self.occupied_studs[h]) < 1:
+            return ID_EXCEP
+        for coords in self.occupied_studs[h]:
+            if coords[0] == tube_coord[0] and coords[1] == tube_coord[1] and coords[2] == tube_coord[2]:
+                return coords[3]
+        return ID_EXCEP
+
+    def get_neighbour_tube_id_for_given_stud(self, stud_coord):
+        h = stud_coord[2]
+        if h in self.occupied_tubes:
+            for coords in self.occupied_tubes[h]:
+                if coords[0] == stud_coord[0] and coords[1] == stud_coord[1] and coords[2] == stud_coord[2]:
+                    return coords[3]
+        return ID_EXCEP
+
     def replace(self, db_brick_id, start_coordinates, rotation):
         piece_info_in_space = calculates_coordinates_starting_from_the_beginning(self.db_brick_info[db_brick_id], start_coordinates, rotation)
         my_brick = Brick(db_brick_id, "alb", self)
         my_brick_id = my_brick.brick_id
+
         if self.we_can_put_piece(piece_info_in_space):
-            # put piece:
             for coord_space in piece_info_in_space[3]:
                 h = coord_space[2]
-                # pentru vizualizare folosim loc
                 loc = self.occupied_space[h].index([coord_space[0], coord_space[1], coord_space[2], ID_EXCEP])
                 self.occupied_space[h].remove([coord_space[0], coord_space[1], coord_space[2], ID_EXCEP])
                 self.occupied_space[h].insert(loc, [coord_space[0], coord_space[1], coord_space[2], my_brick_id])
 
-            for coord_tube in piece_info_in_space[5]:
-                h = coord_tube[2]
-                loc = self.occupied_tubes[h].index([coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP])
-                self.occupied_tubes[h].remove([coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP])
-                self.occupied_tubes[h].insert(loc, [coord_tube[0], coord_tube[1], coord_tube[2], my_brick_id])
-
             for coord_stud in piece_info_in_space[4]:
                 h = coord_stud[2]
-                if [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 0] in self.occupied_studs[h]:
-                    to_remove = [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 0]
-                    loc = self.occupied_studs[h].index(to_remove)
-                    self.occupied_studs[h].remove(to_remove)
-                    self.occupied_studs[h].insert(loc, [coord_stud[0], coord_stud[1], coord_stud[2], my_brick_id])
-                elif [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 1] in self.occupied_studs[h]:
-                    to_remove = [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 1]
-                    loc = self.occupied_studs[h].index(to_remove)
-                    self.occupied_studs[h].remove(to_remove)
-                    self.occupied_studs[h].insert(loc, [coord_stud[0], coord_stud[1], coord_stud[2], my_brick_id])
+                to_remove = [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, ID_EXCEP]
+                loc = self.occupied_studs[h].index(to_remove)
+                self.occupied_studs[h].remove(to_remove)
+                id_brick_neighbour = self.get_neighbour_tube_id_for_given_stud(coord_stud)
+                to_remove[3] = my_brick_id
+                to_remove[4] = id_brick_neighbour
+                self.occupied_studs[h].insert(loc, to_remove)
 
-            # for coord_tube in piece_info_in_space[5]: -> coencide cu space
+                # punem si la vecin in tub informatia despre studul conectat
+                coord_tube = coord_stud
+                if id_brick_neighbour != ID_EXCEP and [coord_tube[0], coord_tube[1], coord_tube[2], id_brick_neighbour, ID_EXCEP] in self.occupied_tubes[h]:
+                    to_remove = [coord_tube[0], coord_tube[1], coord_tube[2], id_brick_neighbour, ID_EXCEP]
+                    loc = self.occupied_tubes[h].index(to_remove)
+                    self.occupied_tubes[h].remove(to_remove)
+                    to_remove[4] = my_brick_id
+                    self.occupied_tubes[h].insert(loc, to_remove)
+
+            for coord_tube in piece_info_in_space[5]:
+                h = coord_tube[2]
+                to_remove = [coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP]
+                loc = self.occupied_tubes[h].index(to_remove)
+                self.occupied_tubes[h].remove(to_remove)
+                id_brick_neighbour = self.get_neighbour_stud_id_for_given_tube(coord_tube)
+                to_remove[3] = my_brick_id
+                to_remove[4] = id_brick_neighbour
+                self.occupied_tubes[h].insert(loc, to_remove)
+
+                # punem si la vecin in stud informatia despre tubul conectat
+                coord_stud = coord_tube
+                if id_brick_neighbour != ID_EXCEP and [coord_stud[0], coord_stud[1], coord_stud[2], id_brick_neighbour, ID_EXCEP] in self.occupied_studs[h]:
+                    to_remove = [coord_stud[0], coord_stud[1], coord_stud[2], id_brick_neighbour, ID_EXCEP]
+                    loc = self.occupied_studs[h].index(to_remove)
+                    self.occupied_studs[h].remove(to_remove)
+                    to_remove[4] = my_brick_id
+                    self.occupied_studs[h].insert(loc, to_remove)
         else:
             print("Replace error", db_brick_id, start_coordinates)
+
 
 class Brick:
     def __init__(self, db_id, color, given_configuration):
@@ -432,7 +465,7 @@ class Brick:
         self.color = color
 
         if given_configuration is not None:
-            self.brick_id = len(given_configuration.lego_bricks)  # cheia pentru dictionarul _lego_bricks
+            self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
             given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
@@ -556,9 +589,8 @@ def init_conf_with_placeholders(configuration):
     conf_init = copy.deepcopy(configuration)
     conf_init.lego_bricks = dict()
 
-    # 0 daca nu se vede acel stud si 1 daca se vede? are rost?
     for h, value in conf_init.occupied_studs.items():
-        conf_init.occupied_studs[h] = [[x, y, z, ID_EXCEP, 0 if not_visible else 1] for x, y, z, _, not_visible in value]
+        conf_init.occupied_studs[h] = [[x, y, z, ID_EXCEP, ID_EXCEP] for x, y, z, _, not_visible in value]
     for h, value in conf_init.occupied_tubes.items():
         conf_init.occupied_tubes[h] = [[x, y, z, ID_EXCEP, ID_EXCEP] for x, y, z, _, _ in value]
 
@@ -567,10 +599,10 @@ def init_conf_with_placeholders(configuration):
         for x, y, z, _ in value:
             conf_init.occupied_space[h].append([x, y, z, ID_EXCEP])
             if h + 1 in conf_init.occupied_studs:
-                if [x, y, z+1, ID_EXCEP, 1] not in conf_init.occupied_studs[h+1] and [x, y, z+1, ID_EXCEP, 0] not in conf_init.occupied_studs[h+1]:
-                    conf_init.occupied_studs[h + 1].append([x, y, z+1, ID_EXCEP, 0])
+                if [x, y, z+1, ID_EXCEP, ID_EXCEP] not in conf_init.occupied_studs[h+1]:
+                    conf_init.occupied_studs[h + 1].append([x, y, z+1, ID_EXCEP, ID_EXCEP])
             else:
-                conf_init.occupied_studs[h + 1] = [[x, y, z+1, ID_EXCEP, 0]]
+                conf_init.occupied_studs[h + 1] = [[x, y, z+1, ID_EXCEP, ID_EXCEP]]
 
             if h in conf_init.occupied_tubes:
                 if [x, y, z, ID_EXCEP, ID_EXCEP] not in conf_init.occupied_tubes[h]:
@@ -585,9 +617,10 @@ if __name__ == '__main__':
     conf = config1_pieces1()
     disponible_pices = [[3010, 3], [3003, 2], [3020, 2], [3005, 5]]
     conf_initial = init_conf_with_placeholders(conf)
-    verificare(conf_initial)
+    # verificare(conf_initial)
     # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 2], rotation=1)
     # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=1)
+    # !!!!!ATENTIE: studsurile si tuburile care au id -1 nu fac parte din configuratie. Sunt ca niste spatii goale.
     conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 0], rotation=1)
     conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 3], rotation=1)
     conf_initial.replace(db_brick_id=3020, start_coordinates=[0, 0, 6], rotation=0)
