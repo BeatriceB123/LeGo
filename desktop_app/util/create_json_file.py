@@ -18,7 +18,7 @@ def import_from_image():
     data['piece-list'].append(create_dict_for_json(3005, 1, 1, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3008, 1, 8, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3009, 1, 6, 3, flag=True))
-    data['piece-list'].append(create_dict_for_json(3010, 1, 3, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3010, 1, 4, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3020, 2, 4, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3021, 2, 3, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(3022, 2, 2, 1, flag=True))
