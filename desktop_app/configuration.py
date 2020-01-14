@@ -458,6 +458,20 @@ class Configuration:
         else:
             print("Replace error", db_brick_id, start_coordinates)
 
+    def sort_conf(self):
+        self.occupied_space = get_coordinates_from_dict(self.occupied_space)
+        self.occupied_studs = get_coordinates_from_dict(self.occupied_studs)
+        self.occupied_tubes = get_coordinates_from_dict(self.occupied_tubes)
+        return conf
+
+
+def get_coordinates_from_dict(my_dict):
+    li = []
+    for key, value in my_dict.items():
+        for elm in value:
+            li.append(elm[:3])
+    return sorted(li, key=lambda tup: (tup[0], tup[1], tup[2]), reverse=False)
+
 
 class Brick:
     def __init__(self, db_id, color, given_configuration):
