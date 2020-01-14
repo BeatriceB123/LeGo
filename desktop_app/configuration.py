@@ -365,18 +365,27 @@ class Configuration:
     def we_can_put_piece(self, piece_info_in_space):
         for coord_space in piece_info_in_space[3]:
             h = coord_space[2]
-            if [coord_space[0], coord_space[1], coord_space[2], ID_EXCEP] not in self.occupied_space[h]:
+            if h in self.occupied_space:
+                if [coord_space[0], coord_space[1], coord_space[2], ID_EXCEP] not in self.occupied_space[h]:
+                    return False
+            else:
                 return False
 
         for coord_stud in piece_info_in_space[4]:
             h = coord_stud[2]
-            if [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 0] not in self.occupied_studs[h]\
-                    and [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 1] not in self.occupied_studs[h]:
+            if h in self.occupied_studs:
+                if [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 0] not in self.occupied_studs[h]\
+                        and [coord_stud[0], coord_stud[1], coord_stud[2], ID_EXCEP, 1] not in self.occupied_studs[h]:
+                    return False
+            else:
                 return False
 
         for coord_tube in piece_info_in_space[5]:
             h = coord_tube[2]
-            if [coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP] not in self.occupied_tubes[h]:
+            if h in self.occupied_tubes:
+                if [coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP] not in self.occupied_tubes[h]:
+                    return False
+            else:
                 return False
 
         return True
@@ -394,21 +403,11 @@ class Configuration:
                 self.occupied_space[h].remove([coord_space[0], coord_space[1], coord_space[2], ID_EXCEP])
                 self.occupied_space[h].insert(loc, [coord_space[0], coord_space[1], coord_space[2], my_brick_id])
 
-                loc = self.occupied_tubes[h].index([coord_space[0], coord_space[1], coord_space[2], ID_EXCEP, ID_EXCEP])
-                self.occupied_tubes[h].remove([coord_space[0], coord_space[1], coord_space[2], ID_EXCEP, ID_EXCEP])
-                self.occupied_tubes[h].insert(loc, [coord_space[0], coord_space[1], coord_space[2], my_brick_id])
-
-                h += 1
-                if [coord_space[0], coord_space[1], coord_space[2] + 1, ID_EXCEP, 0] in self.occupied_studs[h]:
-                    to_remove = [coord_space[0], coord_space[1], coord_space[2] + 1, ID_EXCEP, 0]
-                    loc = self.occupied_studs[h].index(to_remove)
-                    self.occupied_studs[h].remove(to_remove)
-                    self.occupied_studs[h].insert(loc, [coord_space[0], coord_space[1], coord_space[2] + 1, my_brick_id])
-                elif [coord_space[0], coord_space[1], coord_space[2] + 1, ID_EXCEP, 1] in self.occupied_studs[h]:
-                    to_remove = [coord_space[0], coord_space[1], coord_space[2] + 1, ID_EXCEP, 1]
-                    loc = self.occupied_studs[h].index(to_remove)
-                    self.occupied_studs[h].remove(to_remove)
-                    self.occupied_studs[h].insert(loc, [coord_space[0], coord_space[1], coord_space[2] + 1, my_brick_id])
+            for coord_tube in piece_info_in_space[5]:
+                h = coord_tube[2]
+                loc = self.occupied_tubes[h].index([coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP])
+                self.occupied_tubes[h].remove([coord_tube[0], coord_tube[1], coord_tube[2], ID_EXCEP, ID_EXCEP])
+                self.occupied_tubes[h].insert(loc, [coord_tube[0], coord_tube[1], coord_tube[2], my_brick_id])
 
             for coord_stud in piece_info_in_space[4]:
                 h = coord_stud[2]
