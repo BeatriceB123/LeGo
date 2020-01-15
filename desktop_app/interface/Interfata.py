@@ -1,8 +1,10 @@
 import sys
 import os, os.path
 import PIL.Image as Image
-from desktop_app.util import export, importFile, drawImage
-from desktop_app.interface import add_config_screen as config
+from util import export, importFile, drawImage
+from interface import add_config_screen as config
+from interface import last_screen
+import main_function
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
@@ -245,7 +247,7 @@ class UpdateItemWindow(QWidget):
 def get_number_of_lines():
     global list_of_images_id
     count = 0
-    for root, dirs, files in os.walk("E:\Pycharm\Projects\AI-Project\desktop_app\lego_pictures"):
+    for root, dirs, files in os.walk("..\\lego_pictures\\"):
         for i in files:
             if i.split(".")[1] == "png":
                 list_of_images_id.append(i.split(".")[0])
@@ -429,6 +431,9 @@ class MainWindow(QWidget):
         self.left_side_layout.addWidget(self.tableWidget)
 
     def generate_button_clicked(self):
+        result = dict()
+        result = main_function.main_function()
+        self.end_tab = last_screen.EndScreen(result)
         print("Not implemented")
 
     def configuration_button_clicked(self):
@@ -473,7 +478,6 @@ class MainWindow(QWidget):
                 self.tableWidget.setRowHidden(index, False)
             else:
                 self.tableWidget.setRowHidden(index, True)
-
 
 
 if __name__ == "__main__":
