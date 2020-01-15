@@ -432,7 +432,12 @@ class MainWindow(QWidget):
 
     def generate_button_clicked(self):
         result = dict()
-        result = main_function.main_function()
+        list_of_data = []
+        for row in range(0, self.tableWidgetRight.rowCount()):
+            list_of_data.append((self.tableWidgetRight.item(row, 1).text(),
+                                 self.tableWidgetRight.item(row, 2).text(),
+                                 self.tableWidgetRight.item(row, 3).text()))
+        result = main_function.main_function(list_of_data, self.check_box.isChecked(), self.color_check_box.isChecked())
         self.end_tab = last_screen.EndScreen(result)
         print("Not implemented")
 

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from desktop_app.configuration import Brick
+from configuration import Brick
 
 sys.path.append("..")
 # from desktop_app import configuration
@@ -255,6 +255,7 @@ class AddConfigurationScreen(QWidget):
                 new_image_location = "..\\configurations"
                 shutil.copy(self.select_path_line.text(), new_image_location + "\\" + str(count) + ".jpg")
                 self.close()
+
 
 def get_number_of_lines():
     global list_of_images_id_add
