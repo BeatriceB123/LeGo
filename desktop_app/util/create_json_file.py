@@ -5,10 +5,8 @@ def import_from_image():
     data = dict()
     data['type'] = "brick"
     data['piece-list'] = []
-    # with open("../lego_piece_info.json") as data_file:
-    #     data = json.load(data_file)
-    data['piece-list'].append(create_l_2x2(2357, 2, 2, 3))
-    data['piece-list'].append(create_l_2x2(2420, 2, 2, 1))
+    data['piece-list'].append(create_2357())
+    data['piece-list'].append(create_2420())
     data['piece-list'].append(create_dict_for_json(2431, 1, 4, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(2445, 2, 12, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(2456, 2, 6, 3, flag=True))
@@ -211,30 +209,43 @@ def create_3040():
     return piece
 
 
-def create_l_2x2(id, length, width, height):
+def create_2357():
     piece = dict()
-    piece['id'] = id
-    piece['length'] = length
-    piece['width'] = width
-    piece['height'] = height
-    piece['space'] = []
-    piece['studs'] = []
-    piece['tubes'] = []
-    piece['image-path'] = "./lego_pictures/" + str(id)
-    for i in range(0, length):
-        for j in range(0, width):
-            for k in range(0, height):
-                piece['space'].append([i, j, k])
-                if k == height - 1:
-                    piece['studs'].append([i, j, height])
-            piece['tubes'].append([i, j, 0])
-        if i == length - 1:
-            break
-    for t in range(0, height):
-        piece['space'].append([length - 1, width - 1, t])
-        if t == height - 1:
-            piece['studs'].append([length - 1, width - 1, height])
-    piece['tubes'].append([length - 1, width - 1, 0])
+    piece['id'] = 2357
+    piece['length'] = 2
+    piece['width'] = 2
+    piece['height'] = 3
+    piece['space'] = [
+        [0, 0, 0], [0, 0, 1], [0, 0, 2],
+        [0, 1, 0], [0, 1, 1], [0, 1, 2],
+        [1, 1, 0], [1, 1, 1], [1, 1, 2]
+    ]
+    piece['studs'] = [
+        [0, 0, 3], [0, 1, 3], [1, 1, 3]
+    ]
+    piece['tubes'] = [
+        [0, 0, 0], [0, 1, 0], [1, 1, 0]
+    ]
+    piece['image-path'] = "./lego_pictures/2357"
+    return piece
+
+
+def create_2420():
+    piece = dict()
+    piece['id'] = 2420
+    piece['length'] = 2
+    piece['width'] = 2
+    piece['height'] = 1
+    piece['space'] = [
+        [0, 0, 0], [0, 0, 1], [0, 0, 2],
+    ]
+    piece['studs'] = [
+        [0, 0, 3], [0, 1, 3], [1, 1, 3]
+    ]
+    piece['tubes'] = [
+        [0, 0, 0], [0, 1, 0], [1, 1, 0]
+    ]
+    piece['image-path'] = "./lego_pictures/2420"
     return piece
 
 
