@@ -2,6 +2,7 @@ import sys
 import os, os.path
 import PIL.Image as Image
 from desktop_app.util import export, importFile, drawImage
+from desktop_app.interface import add_config_screen as config
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
@@ -260,7 +261,7 @@ class MainWindow(QWidget):
         self.setWindowTitle("Lego")
         QApplication.setStyle("fusion")
         self.setWindowIcon(QIcon("Icon.png"))
-        self.setStyleSheet("background-color: #F93822")
+        # self.setStyleSheet("background-color: #F93822")
         self.move(400, 100)
         self.init_UI()
 
@@ -431,7 +432,7 @@ class MainWindow(QWidget):
         print("Not implemented")
 
     def configuration_button_clicked(self):
-        print("Not implemented")
+        self.config_tab = config.AddConfigurationScreen()
 
     def import_button_clicked(self):
         filename, _ = QFileDialog.getOpenFileName(filter='JSON(*.json)')

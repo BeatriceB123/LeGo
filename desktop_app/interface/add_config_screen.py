@@ -81,12 +81,14 @@ class AddConfigurationScreen(QWidget):
         self.color_dropdown.addItem("Blue")
         self.color_dropdown.addItem("Red")
         self.color_dropdown.addItem("Green")
+        self.color_dropdown.addItem("Yellow")
         self.color_dropdown.addItem("Lime-Green")
         self.color_dropdown.addItem("Black")
         self.color_dropdown.addItem("Gray")
         self.color_dropdown.addItem("Light-Gray")
         self.color_dropdown.addItem("Brown")
         self.color_dropdown.addItem("Purple")
+
 
         self.rotaton_label = QLabel(self)
         self.rotaton_label.move(354, 230)
@@ -241,7 +243,7 @@ class AddConfigurationScreen(QWidget):
             self.remove_status.setText("Failed")
 
     def finish_button_clicked(self):
-        if self.select_path_line is not '' and \
+        if self.select_path_line.text() is not '' and \
                 len(self.configuration1.lego_bricks) > 0:
             count = 0
             for root, dirs, files in os.walk("..\\configurations\\"):
