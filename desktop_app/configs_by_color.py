@@ -30,6 +30,14 @@ def get_configs_by_color(configuration):
     return result_dict
 
 
+def get_pieces_by_color(color, brick_list):
+    list_of_bricks = []
+    for brick in brick_list:
+        if brick[2] == color:
+            list_of_bricks.append([brick[0], brick[1], brick[2]])
+    return list_of_bricks
+
+
 if __name__ == '__main__':
     config = Configuration()
     config.place_in_studs(Brick(3010, "White", config), [0, 0, 0], rotation=1)
