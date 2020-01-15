@@ -168,14 +168,16 @@ class Configuration:
                 res = re.findall(r, line)
                 for result in res:
                     info2 = result.split(", ")
-                    self.occupied_studs[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+                    aux = int(info2[4][:-1]) if int(info2[4][:-1]) != 0 else -1
+                    self.occupied_studs[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), aux])
             elif mode == 4:
                 info = line.split(",")
                 self.occupied_tubes[int(info[0])] = []
                 res = re.findall(r, line)
                 for result in res:
                     info2 = result.split(", ")
-                    self.occupied_tubes[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+                    aux = int(info2[4][:-1]) if int(info2[4][:-1]) != 0 else -1
+                    self.occupied_tubes[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), aux])
             elif mode == 5:
                 info = line.split("\\")
                 self.image = os.path.join("configurations", info[2])

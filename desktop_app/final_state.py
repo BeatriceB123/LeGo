@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 3, 3], rotation=1)
     # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=0)
     # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 5, 0], rotation=0)
-    conf.load_configuration("D:\\Informatica\\Anul 3 Semestrul 1\\Inteligenta Artificiala\\ProiectAI\\desktop_app\\configurations\\1.txt")
+    conf.load_configuration("D:\\Informatica\\Anul 3 Semestrul 1\\Inteligenta Artificiala\\ProiectAI\\desktop_app\\configurations\\0.txt")
     verificare(conf)
 
     print(is_final_state(conf, []))
