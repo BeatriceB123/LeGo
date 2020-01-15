@@ -82,6 +82,15 @@ class Configuration:
         self.image = "configurations\\placeholder.jpg"
         initialize_lego_bricks_dict(self, interface)
 
+    def my_copy(self):
+        c = Configuration()
+        c.lego_bricks = copy.deepcopy(self.lego_bricks)
+        c.occupied_studs = copy.deepcopy(self.occupied_studs)
+        c.occupied_tubes = copy.deepcopy(self.occupied_tubes)
+        c.occupied_space = copy.deepcopy(self.occupied_space)
+        c.db_brick_info = copy.deepcopy(self.db_brick_info)
+        return c
+
     def get_config_info(self):
         to_write = ""
         to_write += "lego_bricks\n"
@@ -197,7 +206,7 @@ class Configuration:
 
         # daca piesa este deja pusa undeva returneaza fals
         if self.lego_bricks[lego_brick.brick_id][1]:
-            # print("False-> ", lego_brick.brick_id)
+            print("False-> ", lego_brick.brick_id)
             return False
 
         our_piece_new_info = rotate_our_coordinates(self.db_brick_info[lego_brick.db_id], rotation)
@@ -214,7 +223,7 @@ class Configuration:
                         has_at_least_one_stud = True
             self_tubes.append(aux_tube)
         if not has_at_least_one_stud and start_coordinates[2] != 0:
-            # print("False-> ", lego_brick.brick_id)
+            print("False-> ", lego_brick.brick_id)
             return False
 
         # calculeaza spatiile pe care le va ocupa piesa si daca sunt valabile
@@ -232,7 +241,7 @@ class Configuration:
             for space in spaces_to_occupy:
                 for aux_space in occupied_space:
                     if space[0] == aux_space[0] and space[1] == aux_space[1] and space[2] == aux_space[2]:
-                        # print("False-> ", lego_brick.brick_id)
+                        print("False-> ", lego_brick.brick_id)
                         return False
                 else:
                     all_spaces_to_occupy.append(space)
@@ -256,7 +265,7 @@ class Configuration:
             self.occupied_tubes[start_coordinates[2]] = []
         for tube in self_tubes:
             self.occupied_tubes[start_coordinates[2]].append(tube)
-        # print("True-> ", lego_brick.brick_id)
+        print("True-> ", lego_brick.brick_id)
         return True
 
     def get_studs_which_connects_tubes_for_piece(self, piece_info_in_space, id_piece, get_all_with_flag=0):
@@ -344,6 +353,35 @@ class Configuration:
             if in_studs:
                 break
         if in_tubes and in_studs:
+            return False
+        self.lego_bricks[config_id][1] = False
+        occupied_tubes_copy = copy.deepcopy(self.occupied_tubes)
+        for key, value in occupied_tubes_copy.items():
+            for tube in value:
+                if tube[3] == config_id:
+                    self.occupied_tubes[key].remove(tube)
+        for key, value in self.occupied_tubes.items():
+            for tube in value:
+                if tube[4] == config_id:
+                    tube[4] = 0
+        occupied_studs_copy = copy.deepcopy(self.occupied_studs)
+        for key, value in occupied_studs_copy.items():
+            for stud in value:
+                if stud[3] == config_id:
+                    self.occupied_studs[key].remove(stud)
+        for key, value in self.occupied_studs.items():
+            for stud in value:
+                if stud[4] == config_id:
+                    stud[4] = 0
+        occupied_space_copy = copy.deepcopy(self.occupied_space)
+        for key, value in occupied_space_copy.items():
+            for space in value:
+                if space[3] == config_id:
+                    self.occupied_space[key].remove(space)
+        return True
+
+    def remove_brick_bb(self, config_id):
+        if config_id not in self.lego_bricks.keys():
             return False
         self.lego_bricks[config_id][1] = False
         occupied_tubes_copy = copy.deepcopy(self.occupied_tubes)
@@ -594,14 +632,14 @@ def bkt(actual_config, disponible_pieces):
             for place in places:
                 piece_info_in_space = calculates_coordinates_starting_from_the_beginning(actual_config.db_brick_info[piece[0]], [place[0], place[1], place[2]], place[3])
                 if actual_config.we_can_put_piece(piece_info_in_space):
-                    aux_conf = actual_config.replace(piece[0], place)
+                    aux_conf = actual_config.my_copy()
+                    aux_conf = aux_conf.replace(piece[0], place)
                     aux_disponible_pieces = remove_piece_from_disponible_pieces(copy.deepcopy(disponible_pieces), piece[0])
                     if aux_conf.stare_finala(aux_disponible_pieces):
-                        # print("Yes, we can")
-                        goo_li.append(actual_config)
+                        goo_li.append(aux_conf)
                         return True
                     else:
-                        bkt(aux_conf, aux_disponible_pieces)
+                        return bkt(aux_conf, aux_disponible_pieces)
     return False
 
 
@@ -609,7 +647,6 @@ def get_all_plausible_combinations_of_pieces(configuration, disponible_pieces):
     posli = [list(range(x[1]+1)) for x in disponible_pieces]
     possible_combinations = product(*posli)
     expected_volume = volume_conf(configuration)
-
     good_combination = []
     for combination in possible_combinations:
         pieces = [[brick_id, combination[i]] for i, [brick_id, _] in enumerate(disponible_pieces) if combination[i] > 0]
@@ -619,15 +656,92 @@ def get_all_plausible_combinations_of_pieces(configuration, disponible_pieces):
     return good_combination
 
 
+def preprocess_configuration(configuration, disponible):
+    li_id_for_special_pieces = [3039, 3040, 3307, 3659, 4286, 4490]
+    dis_dict = dict(disponible)
+    for key, brick in configuration.lego_bricks.items():
+        used_brick_id = brick[0].db_id
+        if used_brick_id in li_id_for_special_pieces:
+            if used_brick_id in dis_dict:
+                dis_dict[used_brick_id] -= 1
+                flag = configuration.remove_brick_bb(brick[0].brick_id)
+                print("Piece", brick[0].brick_id, '=', brick[0].db_id,  "removed?", flag, sep=" ")
+                if dis_dict[used_brick_id] == 0:
+                    del dis_dict[used_brick_id]
+            else:
+                return None
+    disponible = []
+    for key, value in dis_dict.items():
+        disponible.append([key, value])
+    return configuration, disponible
+
+
 def verify_if_we_can_build(configuration, disponible_pieces):
+    print(volume_conf(configuration))
+    print(volume(configuration, disponible_pieces))
+    # verificare(configuration)
+
+    preproces = preprocess_configuration(configuration, disponible_pieces)
+    if not preproces:
+        return False
+
+    configuration = preproces[0]
+    disponible_pieces = preproces[1]
+    print(disponible_pieces)
+    print(volume_conf(configuration))
+    print(volume(configuration, disponible_pieces))
+
     good_combination = get_all_plausible_combinations_of_pieces(configuration, disponible_pieces)
+
+    print(good_combination)
     for pieces in good_combination:
-        # print("Verificam combinatia de piese", pieces, sep=" : ")
         configuration_aux = init_conf_with_placeholders(configuration)
-        flag = bkt(init_conf_with_placeholders(configuration_aux), pieces)
+        bkt(init_conf_with_placeholders(configuration_aux), pieces)
         if len(goo_li) > 0:
             return True
     return False
+
+
+def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible):
+    original_pieces = get_list_of_used_bricks_in_conf(configuration)
+    dict_original = dict(original_pieces)
+    dict_disponible = dict(disponible)
+    for key, value in dict_original.items():
+        if key in dict_disponible:
+            if dict_disponible[key] < dict_original[key]:
+                return False
+        else:
+            return False
+    return True
+
+
+def verify_if_we_can_build_with_exactly_given_pieces_and_color(configuration, disponible_id_nr_color):
+    original_pieces_dict = get_dict_of_used_bricks_in_conf_with_color(configuration)
+    disponible_pieces_dict = get_dict_from_list_of_pieces(disponible_id_nr_color)
+    for brick_id, value in original_pieces_dict.items():
+        for color, number in value.items():
+            if brick_id not in disponible_pieces_dict:
+                return False
+            if color not in disponible_pieces_dict[brick_id]:
+                return False
+            if disponible_pieces_dict[brick_id][color] < number:
+                return False
+    return True
+
+
+def get_dict_of_used_bricks_in_conf_with_color(configuration):
+    used_bricks = dict()
+    for brick_nr, brick in configuration.lego_bricks.items():
+        brick_obj = brick[0]
+        if brick_obj.db_id in used_bricks:
+            if brick_obj.color in used_bricks[brick_obj.db_id]:
+                used_bricks[brick_obj.db_id][brick_obj.color] += 1
+            else:
+                used_bricks[brick_obj.db_id][brick_obj.color] = 1
+        else:
+            used_bricks[brick_obj.db_id] = dict()
+            used_bricks[brick_obj.db_id][brick_obj.color] = 1
+    return used_bricks
 
 
 def get_list_of_used_bricks_in_conf(configuration):
@@ -643,17 +757,27 @@ def get_list_of_used_bricks_in_conf(configuration):
     return res
 
 
-def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible):
-    original_pieces = get_list_of_used_bricks_in_conf(configuration)
-    dict_original = dict(original_pieces)
-    dict_disponible = dict(disponible)
-    for key, value in dict_original.items():
-        if key in dict_disponible:
-            if dict_disponible[key] < dict_original[key]:
-                return False
+def get_list_of_used_bricks_in_conf_with_color(configuration):
+    aux = get_dict_of_used_bricks_in_conf_with_color(configuration)
+    user_list = []
+    for brick_id, value in aux.items():
+        for color, number in value.items():
+            user_list.append([brick_id, number, color])
+    return user_list
+
+
+def get_dict_from_list_of_pieces(user_list):
+    used_bricks = dict()
+    for brick_id, number, color in user_list:
+        if brick_id in used_bricks:
+            if color in used_bricks[brick_id]:
+                used_bricks[brick_id][color] += number
+            else:
+                used_bricks[brick_id][color] = number
         else:
-            return False
-    return True
+            used_bricks[brick_id] = dict()
+            used_bricks[brick_id][color] = number
+    return used_bricks
 
 
 def init_conf_with_placeholders(configuration):
@@ -686,8 +810,15 @@ def init_conf_with_placeholders(configuration):
 
 if __name__ == '__main__':
     conf = Configuration()
-    conf.load_configuration("18.txt")
-    disp_piec = get_list_of_used_bricks_in_conf(conf)
-    print(disp_piec)
-    print("We can build", verify_if_we_can_build(conf, disp_piec), sep=" : ")
-    print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_piec), sep=" : ")
+    conf.load_configuration("8.txt")
+
+    disp_piec = get_list_of_used_bricks_in_conf_with_color(conf)
+
+    disp_piec = [[3020, 3, 'Blue'],  [3000, 1, "CuloareHere"], [3003, 12, 'Blue'], [3001, 6, 'Blue'], [3002, 2, 'Blue'], [3004, 4, 'White'], [3004, 4, 'Black']]
+
+    print(verify_if_we_can_build_with_exactly_given_pieces_and_color(conf, disp_piec))
+
+    # disp_piec = [[3001, 8], [3010, 6], [3622, 4], [3039, 1], [3004, 5]]  ##pt conf 1
+
+    # print("We can build", verify_if_we_can_build(conf, disp_piec), sep=" : ")
+    # print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_piec), sep=" : ")
