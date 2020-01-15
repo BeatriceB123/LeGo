@@ -153,7 +153,7 @@ class Configuration:
                 mode = 5
             elif mode == 1:
                 info = line.split(", ")
-                lego_brick = Brick(int(info[1]), info[2], self)
+                lego_brick = Brick(int(info[1]), info[2], self, int(info[0]))
                 self.lego_bricks[int(info[0])][1] = True
             elif mode == 2:
                 info = line.split(",")
@@ -161,21 +161,26 @@ class Configuration:
                 res = re.findall(r, line)
                 for result in res:
                     info2 = result.split(", ")
-                    self.occupied_space[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3][:-1])])
+                    self.occupied_space[int(info[0])].append(
+                        [int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3][:-1])])
             elif mode == 3:
                 info = line.split(",")
                 self.occupied_studs[int(info[0])] = []
                 res = re.findall(r, line)
                 for result in res:
                     info2 = result.split(", ")
-                    self.occupied_studs[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+                    aux = int(info2[4][:-1]) if int(info2[4][:-1]) != 0 else -1
+                    self.occupied_studs[int(info[0])].append(
+                        [int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), aux])
             elif mode == 4:
                 info = line.split(",")
                 self.occupied_tubes[int(info[0])] = []
                 res = re.findall(r, line)
                 for result in res:
                     info2 = result.split(", ")
-                    self.occupied_tubes[int(info[0])].append([int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), int(info2[4][:-1])])
+                    aux = int(info2[4][:-1]) if int(info2[4][:-1]) != 0 else -1
+                    self.occupied_tubes[int(info[0])].append(
+                        [int(info2[0][1:]), int(info2[1]), int(info2[2]), int(info2[3]), aux])
             elif mode == 5:
                 info = line.split("\\")
                 self.image = os.path.join("configurations", info[2])
@@ -395,11 +400,12 @@ class Configuration:
 
     def get_neighbour_stud_id_for_given_tube(self, tube_coord):
         h = tube_coord[2]
-        if len(self.occupied_studs[h]) < 1:
-            return ID_EXCEP
-        for coords in self.occupied_studs[h]:
-            if coords[0] == tube_coord[0] and coords[1] == tube_coord[1] and coords[2] == tube_coord[2]:
-                return coords[3]
+        if h in self.occupied_studs:
+            if len(self.occupied_studs[h]) < 1:
+                return ID_EXCEP
+            for coords in self.occupied_studs[h]:
+                if coords[0] == tube_coord[0] and coords[1] == tube_coord[1] and coords[2] == tube_coord[2]:
+                    return coords[3]
         return ID_EXCEP
 
     def get_neighbour_tube_id_for_given_stud(self, stud_coord):
@@ -489,12 +495,15 @@ def get_coordinates_from_dict(my_dict):
 
 
 class Brick:
-    def __init__(self, db_id, color, given_configuration):
+    def __init__(self, db_id, color, given_configuration, dict_value=-1):
         self.db_id = db_id
         self.color = color
 
         if given_configuration is not None:
-            self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+            if dict_value == -1:
+                self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+            else:
+                self.brick_id = dict_value
             given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 
@@ -647,62 +656,6 @@ def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible):
     return True
 
 
-# o configuratie exemplu
-def config1_pieces1():
-    configuration = Configuration()
-    configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 0], rotation=1)
-    configuration.place_in_studs(Brick(3010, "White", configuration), [0, 0, 3], rotation=1)
-    configuration.place_in_studs(Brick(3020, "White", configuration), [0, 0, 6], rotation=0)
-    # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
-    configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 3, 3], rotation=1)
-    configuration.place_in_tubes(Brick(3003, "White", configuration), [3, 3, 0], rotation=0)
-    configuration.place_in_studs(Brick(3003, "White", configuration), [3, 5, 0], rotation=0)
-    # print(configuration.place_in_studs(Brick(4490, "White", configuration), [0, 4, 0], rotation=0))
-    print("Configuratie creata cu succes")
-    return configuration
-
-
-# 18
-def conf_18():
-    configuration = Configuration()
-    #piciorutele
-    configuration.place_in_studs(Brick(3020, "Blue", configuration), [0, 0, 0], rotation=1)
-    configuration.place_in_studs(Brick(3020, "Blue", configuration), [0, 7, 0], rotation=1)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 0, 1], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 0, 4], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 7, 1], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 7, 4], rotation=0)
-
-    # baza
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 0, 7], rotation=0)  # piesa 7
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 4, 7], rotation=0)
-
-    # suportul clapelor + cutia din spate
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 0, 10], rotation=1)  # piesa 9
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 2, 10], rotation=1)
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 4, 10], rotation=1)
-    configuration.place_in_studs(Brick(3001, "Blue", configuration), [0, 6, 10], rotation=1)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 0, 13], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 2, 13], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 4, 13], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 6, 13], rotation=0)  # piesa 16
-    configuration.place_in_studs(Brick(3002, "Blue", configuration), [0, 0, 16], rotation=0)
-    configuration.place_in_studs(Brick(3003, "Blue", configuration), [0, 3, 16], rotation=0)
-    configuration.place_in_studs(Brick(3002, "Blue", configuration), [0, 5, 16], rotation=0)
-
-    # clapele de pian
-    configuration.place_in_studs(Brick(3004, "White", configuration), [2, 0, 13], rotation=1)  # piesa 20
-    configuration.place_in_studs(Brick(3004, "Black", configuration), [2, 1, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "White", configuration), [2, 2, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "Black", configuration), [2, 3, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "White", configuration), [2, 4, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "Black", configuration), [2, 5, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "White", configuration), [2, 6, 13], rotation=1)
-    configuration.place_in_studs(Brick(3004, "Black", configuration), [2, 7, 13], rotation=1)  # piesa 27
-
-    return configuration
-
-
 def init_conf_with_placeholders(configuration):
     conf_init = copy.deepcopy(configuration)
     conf_init.lego_bricks = dict()
@@ -732,14 +685,9 @@ def init_conf_with_placeholders(configuration):
 
 
 if __name__ == '__main__':
-    conf = conf_18()
-
-    disp_pieces_for_conf_18 = get_list_of_used_bricks_in_conf(conf_18())
-    # another list for conf 18:
-    print("Used_pieces_for_conf_18:", disp_pieces_for_conf_18)
-    disp_pieces_for_conf_18 = [[2456, 3], [3020, 2], [3003, 3], [3001, 6], [3002, 2], [3004, 8]]
-    print(disp_pieces_for_conf_18)
-
-    print("We can build", verify_if_we_can_build(conf, disp_pieces_for_conf_18), sep=" : ")
-    print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_pieces_for_conf_18), sep=" : ")
-
+    conf = Configuration()
+    conf.load_configuration("18.txt")
+    disp_piec = get_list_of_used_bricks_in_conf(conf)
+    print(disp_piec)
+    print("We can build", verify_if_we_can_build(conf, disp_piec), sep=" : ")
+    print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_piec), sep=" : ")
