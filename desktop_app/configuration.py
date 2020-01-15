@@ -406,7 +406,9 @@ class Configuration:
                     return coords[3]
         return ID_EXCEP
 
-    def replace(self, db_brick_id, start_coordinates, rotation):
+    def replace(self, db_brick_id, place):
+        start_coordinates = [place[0], place[1], place[2]]
+        rotation = place[3]
         piece_info_in_space = calculates_coordinates_starting_from_the_beginning(self.db_brick_info[db_brick_id], start_coordinates, rotation)
         my_brick = Brick(db_brick_id, "alb", self)
         my_brick_id = my_brick.brick_id
@@ -457,6 +459,7 @@ class Configuration:
                     self.occupied_studs[h].insert(loc, to_remove)
         else:
             print("Replace error", db_brick_id, start_coordinates)
+        return self
 
     def sort_conf(self):
         self.occupied_space = get_coordinates_from_dict(self.occupied_space)
@@ -464,6 +467,10 @@ class Configuration:
         self.occupied_tubes = get_coordinates_from_dict(self.occupied_tubes)
         return conf
 
+    def stare_finala(self, disponible_pieces):
+        if len(disponible_pieces) == 0:
+            return True
+        return False
 
 def get_coordinates_from_dict(my_dict):
     li = []
@@ -515,15 +522,30 @@ def verificare(configuration):
         print(key, value)
 
 
-def get_all_places_where_you_can_put_piece(config, piece):
-    return [(0, 0, 0)]
+def get_all_places_where_you_can_put_piece(given_config, id_from_db):
+    result_list = []
+    for key, value in given_config.occupied_space.items():
+        for coordinates in value:
+            start_coordinates = [coordinates[0], coordinates[1], coordinates[2]]
+            for rotation in range(0, 4):
+                piece_info_in_space = calculates_coordinates_starting_from_the_beginning(
+                  given_config.db_brick_info[id_from_db], start_coordinates, rotation)
+                if given_config.we_can_put_piece(piece_info_in_space):
+                    result_list.append((coordinates[0], coordinates[1], coordinates[2], rotation))
+    return result_list
 
 
-def replace(config, start_coords, piece):
-    return config
+def remove_piece_from_disponible_pieces(disponible_pieces, piece_id_to_remove):
+    for count, piece in enumerate(disponible_pieces):
+        if piece[0] == piece_id_to_remove:
+            if disponible_pieces[count][1] == 0:
+                disponible_pieces.remove(piece)
+                return disponible_pieces
 
-
-def remove_piece_from_disponible_pieces(disponible_pieces, piece):
+            disponible_pieces[count][1] -= 1
+            if disponible_pieces[count][1] == 0:
+                disponible_pieces.remove(piece)
+            return disponible_pieces
     return disponible_pieces
 
 
@@ -542,22 +564,21 @@ def volume_conf(configuration):
     return configuration_volume
 
 
-def stare_finala(conf, disponible_pieces):
-    if len(disponible_pieces) == 0:
-        return True
-    return False
-
-
 def bkt(actual_config, disponible_pieces):
     for piece in disponible_pieces:
-        places = get_all_places_where_you_can_put_piece(actual_config, piece)
+        places = get_all_places_where_you_can_put_piece(actual_config, piece[0])
         for place in places:
-            aux_conf = replace(actual_config, place, piece)
-            aux_disponible_pieces = disponible_pieces.copy()
-            if stare_finala(aux_conf, disponible_pieces):
-                return True
-            else:
-                bkt(aux_conf, aux_disponible_pieces)
+            piece_info_in_space = calculates_coordinates_starting_from_the_beginning(actual_config.db_brick_info[piece[0]], [place[0], place[1], place[2]], place[3])
+            if actual_config.we_can_put_piece(piece_info_in_space):
+                aux_conf = actual_config.replace(piece[0], place)
+                aux_disponible_pieces = remove_piece_from_disponible_pieces(copy.deepcopy(disponible_pieces), piece[0])
+                if aux_conf.stare_finala(aux_disponible_pieces):
+                    print("Yes, we can")
+                    return True
+                    return
+                else:
+                    bkt(aux_conf, aux_disponible_pieces)
+    return False
 
 
 def get_all_plausible_combinations_of_pieces(configuration, disponible_pices):
@@ -567,11 +588,9 @@ def get_all_plausible_combinations_of_pieces(configuration, disponible_pices):
 
     good_combination = []
     for combination in possible_combinations:
-        pieces = [[brick_id, combination[i]] for i, [brick_id, _] in enumerate(disponible_pices)]
+        pieces = [[brick_id, combination[i]] for i, [brick_id, _] in enumerate(disponible_pices) if combination[i] > 0]
         if volume(configuration, pieces) == expected_volume:
             good_combination.append(pieces)
-    pprint(good_combination)
-
     # si tot in functia asta am putea verifica daca avem piese speciale ce acopera posibilele cazuri speciale
     return good_combination
 
@@ -579,7 +598,18 @@ def get_all_plausible_combinations_of_pieces(configuration, disponible_pices):
 def verify_if_we_can_build(configuration, disponible_pices):
     good_combination = get_all_plausible_combinations_of_pieces(configuration, disponible_pices)
     for pieces in good_combination:
-        if bkt(configuration, pieces):
+        print("Verificam combinatia de piese", pieces, sep=" : ")
+        configuration_aux = init_conf_with_placeholders(configuration)
+        flag = bkt(init_conf_with_placeholders(configuration_aux), pieces)
+        print(flag)
+        if flag:
+            return True
+    return False
+
+
+def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible_pices):
+    if volume(configuration, disponible_pices) == volume_conf(configuration):
+        if bkt(configuration, disponible_pices):
             return True
     return False
 
@@ -629,20 +659,6 @@ def init_conf_with_placeholders(configuration):
 
 if __name__ == '__main__':
     conf = config1_pieces1()
-    disponible_pices = [[3010, 3], [3003, 2], [3020, 2], [3005, 5]]
-    conf_initial = init_conf_with_placeholders(conf)
-    # verificare(conf_initial)
-    # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 2], rotation=1)
-    # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=1)
-    # !!!!!ATENTIE: studsurile si tuburile care au id -1 nu fac parte din configuratie. Sunt ca niste spatii goale.
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 0], rotation=1)
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 3], rotation=1)
-    conf_initial.replace(db_brick_id=3020, start_coordinates=[0, 0, 6], rotation=0)
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 3, 3], rotation=1)
-    conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=0)
-    conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 5, 0], rotation=0)
-
-    verificare(conf_initial)
-    # verify_if_we_can_build(conf, disponible_pices)
-    # get_all_plausible_combinations_of_pieces(conf, disponible_pices)
-
+    disp_pices = [[3005, 20], [3020, 1], [3003, 4], [3010, 3], [3020, 1]]
+    print("We can build", verify_if_we_can_build(conf, disp_pices), sep=" : ")
+    print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_pices), sep=" : ")
