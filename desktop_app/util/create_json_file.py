@@ -10,6 +10,7 @@ def import_from_image():
     data['piece-list'].append(create_dict_for_json(2431, 1, 4, 1, flag=False))
     data['piece-list'].append(create_dict_for_json(2445, 2, 12, 1, flag=True))
     data['piece-list'].append(create_dict_for_json(2456, 2, 6, 3, flag=True))
+    data['piece-list'].append(create_dict_for_json(3001, 2, 4, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3002, 2, 3, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3003, 2, 2, 3, flag=True))
     data['piece-list'].append(create_dict_for_json(3004, 1, 2, 3, flag=True))
