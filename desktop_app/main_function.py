@@ -12,7 +12,7 @@ def main_function(user_list, same_bricks, same_color):
             config.load_configuration(filename)
             config_number = int(os.path.splitext(filename)[0])
             if same_bricks and same_color:
-                pass
+                result = verify_if_we_can_build_with_exactly_given_pieces_and_color(config, user_list)
             elif same_bricks and not same_color:
                 result = verify_if_we_can_build_with_exactly_given_pieces(config, user_list)
             elif not same_bricks and same_color:
