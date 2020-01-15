@@ -581,14 +581,14 @@ def get_all_places_where_you_can_put_piece(given_config, id_from_db):
     result_list = []
     for key, value in given_config.occupied_space.items():
         for coordinates in value:
-            start_coordinates = [coordinates[0], coordinates[1], coordinates[2]]
-            for rotation in range(0, 4):
-                # print(start_coordinates, rotation)
-                piece_info_in_space = calculates_coordinates_starting_from_the_beginning(
-                  given_config.db_brick_info[id_from_db], start_coordinates, rotation)
-                # print(piece_info_in_space)
-                if given_config.we_can_put_piece(piece_info_in_space):
-                    result_list.append((coordinates[0], coordinates[1], coordinates[2], rotation))
+            if coordinates[3] == -1:
+                start_coordinates = [coordinates[0], coordinates[1], coordinates[2]]
+                # TO DO -> pana la 4
+                for rotation in range(2):
+                    piece_info_in_space = calculates_coordinates_starting_from_the_beginning(
+                      given_config.db_brick_info[id_from_db], start_coordinates, rotation)
+                    if given_config.we_can_put_piece(piece_info_in_space):
+                        result_list.append((coordinates[0], coordinates[1], coordinates[2], rotation))
     return result_list
 
 
@@ -639,7 +639,8 @@ def bkt(actual_config, disponible_pieces):
                         goo_li.append(aux_conf)
                         return True
                     else:
-                        return bkt(aux_conf, aux_disponible_pieces)
+                        if bkt(aux_conf, aux_disponible_pieces):
+                            return True
     return False
 
 
@@ -650,9 +651,9 @@ def get_all_plausible_combinations_of_pieces(configuration, disponible_pieces):
     good_combination = []
     for combination in possible_combinations:
         pieces = [[brick_id, combination[i]] for i, [brick_id, _] in enumerate(disponible_pieces) if combination[i] > 0]
+        pieces = sorted(pieces, key=lambda piece: volume(configuration, [[piece[0], 1]]), reverse=True)
         if volume(configuration, pieces) == expected_volume:
             good_combination.append(pieces)
-    # si tot in functia asta am putea verifica daca avem piese speciale ce acopera posibilele cazuri speciale
     return good_combination
 
 
@@ -677,10 +678,8 @@ def preprocess_configuration(configuration, disponible):
 
 
 def verify_if_we_can_build(configuration, disponible_pieces):
-    disponible_pieces = [[brick_id, number] for brick_id, number, color in disponible_pieces]
-    print(volume_conf(configuration))
-    print(volume(configuration, disponible_pieces))
-    # verificare(configuration)
+    if len(disponible_pieces[0]) == 3:
+        disponible_pieces = [[brick_id, number] for brick_id, number, color in disponible_pieces]
 
     preproces = preprocess_configuration(configuration, disponible_pieces)
     if not preproces:
@@ -688,24 +687,24 @@ def verify_if_we_can_build(configuration, disponible_pieces):
 
     configuration = preproces[0]
     disponible_pieces = preproces[1]
-    print(disponible_pieces)
-    print(volume_conf(configuration))
-    print(volume(configuration, disponible_pieces))
 
     good_combination = get_all_plausible_combinations_of_pieces(configuration, disponible_pieces)
 
-    print(good_combination)
+    print("Combinatii de piese ce vor fi incercate", good_combination, sep=" : ")
     for pieces in good_combination:
         configuration_aux = init_conf_with_placeholders(configuration)
-        bkt(init_conf_with_placeholders(configuration_aux), pieces)
-        if len(goo_li) > 0:
+        print("BEGIN")
+        if bkt(init_conf_with_placeholders(configuration_aux), pieces):
+            print("Lista de piese cu care s-a format", pieces, sep=" : ")
+            print("Configuratia gasita", goo_li[0], sep=" : ")
             return True
     return False
 
 
 def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible):
     original_pieces = get_list_of_used_bricks_in_conf(configuration)
-    disponible = [[brick_id, number] for brick_id, number, color in disponible]
+    if len(disponible[0]) == 3:
+        disponible = [[brick_id, number] for brick_id, number, color in disponible]
     dict_original = dict(original_pieces)
     dict_disponible = dict(disponible)
     for key, value in dict_original.items():
@@ -814,13 +813,10 @@ if __name__ == '__main__':
     conf = Configuration()
     conf.load_configuration("8.txt")
 
-    disp_piec = get_list_of_used_bricks_in_conf_with_color(conf)
-
-    disp_piec = [[3020, 3, 'Blue'],  [3000, 1, "CuloareHere"], [3003, 12, 'Blue'], [3001, 6, 'Blue'], [3002, 2, 'Blue'], [3004, 4, 'White'], [3004, 4, 'Black']]
-
-    print(verify_if_we_can_build_with_exactly_given_pieces_and_color(conf, disp_piec))
+    disp_piec = get_list_of_used_bricks_in_conf(conf)
+    print(disp_piec)
 
     # disp_piec = [[3001, 8], [3010, 6], [3622, 4], [3039, 1], [3004, 5]]  ##pt conf 1
 
-    # print("We can build", verify_if_we_can_build(conf, disp_piec), sep=" : ")
-    # print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_piec), sep=" : ")
+    print("We can build", verify_if_we_can_build(conf, disp_piec), sep=" : ")
+    print("We can build with all the pieces received", verify_if_we_can_build_with_exactly_given_pieces(conf, disp_piec), sep=" : ")
