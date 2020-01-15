@@ -677,6 +677,7 @@ def preprocess_configuration(configuration, disponible):
 
 
 def verify_if_we_can_build(configuration, disponible_pieces):
+    disponible_pieces = [[brick_id, number] for brick_id, number, color in disponible_pieces]
     print(volume_conf(configuration))
     print(volume(configuration, disponible_pieces))
     # verificare(configuration)
@@ -704,6 +705,7 @@ def verify_if_we_can_build(configuration, disponible_pieces):
 
 def verify_if_we_can_build_with_exactly_given_pieces(configuration, disponible):
     original_pieces = get_list_of_used_bricks_in_conf(configuration)
+    disponible = [[brick_id, number] for brick_id, number, color in disponible]
     dict_original = dict(original_pieces)
     dict_disponible = dict(disponible)
     for key, value in dict_original.items():
