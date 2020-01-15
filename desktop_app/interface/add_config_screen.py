@@ -1,12 +1,17 @@
 import shutil
 import sys
+import os
 
 import PIL.Image as Image
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+from desktop_app.configuration import Brick
+
 sys.path.append("..")
+# from desktop_app import configuration
 from configuration import *
 from util import drawImage
 
@@ -76,6 +81,12 @@ class AddConfigurationScreen(QWidget):
         self.color_dropdown.addItem("Blue")
         self.color_dropdown.addItem("Red")
         self.color_dropdown.addItem("Green")
+        self.color_dropdown.addItem("Lime-Green")
+        self.color_dropdown.addItem("Black")
+        self.color_dropdown.addItem("Gray")
+        self.color_dropdown.addItem("Light-Gray")
+        self.color_dropdown.addItem("Brown")
+        self.color_dropdown.addItem("Purple")
 
         self.rotaton_label = QLabel(self)
         self.rotaton_label.move(354, 230)

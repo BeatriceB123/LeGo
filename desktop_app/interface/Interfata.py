@@ -104,7 +104,6 @@ class AddItemWindow(QWidget):
         self.tab_layout.addWidget(self.confirm_button, alignment=Qt.AlignCenter)
 
     def confirm_functionality(self):
-        current_piece
 
         if self.amount_line_edit.text() == '' or self.amount_line_edit.text() == '0' or self.amount_line_edit.text() == '-':
             self.error_label.setVisible(True)
@@ -245,7 +244,7 @@ class UpdateItemWindow(QWidget):
 def get_number_of_lines():
     global list_of_images_id
     count = 0
-    for root, dirs, files in os.walk("../desktop_app/lego_pictures"):
+    for root, dirs, files in os.walk("E:\Pycharm\Projects\AI-Project\desktop_app\lego_pictures"):
         for i in files:
             if i.split(".")[1] == "png":
                 list_of_images_id.append(i.split(".")[0])
@@ -258,8 +257,10 @@ class MainWindow(QWidget):
         QWidget.__init__(self, *args)
         self.setMinimumSize(QSize(1200, 800))
         self.setMaximumSize(QSize(1200, 800))
-        self.setWindowTitle("Demo app")
+        self.setWindowTitle("Lego")
         QApplication.setStyle("fusion")
+        self.setWindowIcon(QIcon("Icon.png"))
+        self.setStyleSheet("background-color: #F93822")
         self.move(400, 100)
         self.init_UI()
 
@@ -303,6 +304,7 @@ class MainWindow(QWidget):
 
     def add_filter_line(self):
         self.input = QLineEdit()
+        self.input.setStyleSheet("background-color:white")
         self.input.setFixedWidth(200)
         self.input.setValidator(QIntValidator())
         self.input.keyPressEvent = self.keyPressEvent
@@ -312,7 +314,7 @@ class MainWindow(QWidget):
         self.button_configuration = QPushButton("Add Configuration", self)
         self.button_configuration.setFixedHeight(40)
         self.button_configuration.setFixedWidth(170)
-        self.button_configuration.setStyleSheet("background-color:#6e6e6e")
+        self.button_configuration.setStyleSheet("background-color:#FDD20E")
         self.button_configuration.clicked.connect(self.configuration_button_clicked)
 
         self.configuration_generate_layout.addWidget(self.button_configuration)
@@ -320,37 +322,41 @@ class MainWindow(QWidget):
         self.button_generate = QPushButton("Generate", self)
         self.button_generate.setFixedHeight(40)
         self.button_generate.setFixedWidth(170)
-        self.button_generate.setStyleSheet("background-color:#6e6e6e")
+        self.button_generate.setStyleSheet("background-color:#FDD20E")
         self.button_generate.clicked.connect(self.generate_button_clicked)
 
         self.configuration_generate_layout.addWidget(self.button_generate)
 
     def add_second_condition_line(self):
         self.check_box = QCheckBox()
+        self.check_box.setStyleSheet("background-color:white")
         self.text = QLabel()
         self.text.setText("Descompunere")
         self.second_condition_line.addWidget(self.check_box)
         self.second_condition_line.addWidget(self.text)
+        self.second_condition_line.insertStretch(-1, 1)
 
     def add_first_condition_line(self):
-        self.check_box = QCheckBox()
-        self.text = QLabel()
-        self.text.setText("Aceeasi culoare")
-        self.first_condition_line.addWidget(self.check_box)
-        self.first_condition_line.addWidget(self.text)
+        self.color_check_box = QCheckBox()
+        self.color_check_box.setStyleSheet("background-color:white")
+        self.color_text = QLabel()
+        self.color_text.setText("Aceeasi culoare")
+        self.first_condition_line.addWidget(self.color_check_box)
+        self.first_condition_line.addWidget(self.color_text)
+        self.first_condition_line.insertStretch(-1, 1)
 
     def add_label(self):
         self.name_filter_label = QLabel()
         self.name_filter_label.setText("Criterii de filtrare")
         self.name_filter_label.setStyleSheet("font-weight: bold; font-size: 15px; padding-top: 20px;")
-        self.name_filter_label.setAlignment(Qt.AlignCenter)
+        self.name_filter_label.setAlignment(Qt.AlignLeft)
         self.right_side_layout.addWidget(self.name_filter_label)
 
     def creating_buttons(self):
         self.button_import = QPushButton('Import', self)
         self.button_import.setFixedHeight(40)
         self.button_import.setFixedWidth(170)
-        self.button_import.setStyleSheet("background-color:#6e6e6e")
+        self.button_import.setStyleSheet("background-color:#FDD20E")
         self.button_import.clicked.connect(self.import_button_clicked)
 
         self.import_export_layout.addWidget(self.button_import)
@@ -358,7 +364,7 @@ class MainWindow(QWidget):
         self.button_export = QPushButton('Export', self)
         self.button_export.setFixedHeight(40)
         self.button_export.setFixedWidth(170)
-        self.button_export.setStyleSheet("background-color:#6e6e6e")
+        self.button_export.setStyleSheet("background-color:#FDD20E")
         self.button_export.clicked.connect(self.export_button_clicked)
 
         self.import_export_layout.addWidget(self.button_export)
@@ -375,6 +381,7 @@ class MainWindow(QWidget):
         self.tableWidgetRight.setHorizontalHeaderItem(2, QTableWidgetItem("Number of pieces"))
         self.tableWidgetRight.setHorizontalHeaderItem(3, QTableWidgetItem("Color"))
         self.tableWidgetRight.rowCount()
+        self.tableWidgetRight.setStyleSheet("background-color:white")
 
         delegate = AlignDelegate(self.tableWidgetRight)
         self.tableWidgetRight.setItemDelegateForColumn(1, delegate)
@@ -388,6 +395,7 @@ class MainWindow(QWidget):
         self.row_count = get_number_of_lines()
         self.tableWidget.setRowCount(self.row_count)
         self.tableWidget.setColumnCount(2)
+        self.tableWidget.setStyleSheet("background-color:white")
 
         self.tableWidget.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
         self.tableWidget.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
@@ -398,6 +406,7 @@ class MainWindow(QWidget):
         for i in range(0, self.row_count):
             path = drawImage.imagePath
             drawImage.imagePath = drawImage.imagePath + list_of_images_id[i]
+
 
             self.tableWidget.setCellWidget(i, 0, drawImage.ImgWidget(self))
             id_item = QTableWidgetItem(list_of_images_id[i])
@@ -425,9 +434,9 @@ class MainWindow(QWidget):
         print("Not implemented")
 
     def import_button_clicked(self):
-        self.tableWidgetRight.setRowCount(0)
         filename, _ = QFileDialog.getOpenFileName(filter='JSON(*.json)')
         if filename is not '':
+            self.tableWidgetRight.setRowCount(0)
             importFile.populate_table_from_file(filename, self.tableWidgetRight, self.max_width)
 
     def export_button_clicked(self):
