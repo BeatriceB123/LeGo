@@ -153,7 +153,7 @@ class Configuration:
                 mode = 5
             elif mode == 1:
                 info = line.split(", ")
-                lego_brick = Brick(int(info[1]), info[2], self)
+                lego_brick = Brick(int(info[1]), info[2], self, int(info[0]))
                 self.lego_bricks[int(info[0])][1] = True
             elif mode == 2:
                 info = line.split(",")
@@ -481,12 +481,15 @@ def get_coordinates_from_dict(my_dict):
 
 
 class Brick:
-    def __init__(self, db_id, color, given_configuration):
+    def __init__(self, db_id, color, given_configuration, dict_value=-1):
         self.db_id = db_id
         self.color = color
 
         if given_configuration is not None:
-            self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+            if dict_value == -1:
+                self.brick_id = len(given_configuration.lego_bricks) + 1  # cheia pentru dictionarul _lego_bricks
+            else:
+                self.brick_id = dict_value
             given_configuration.lego_bricks[self.brick_id] = [self, False]
 
 

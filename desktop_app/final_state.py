@@ -56,23 +56,25 @@ def is_final_state(configuration: Configuration, piece_list_tuple: list):
 
 if __name__ == '__main__':
 
-    conf = Configuration(True)
-    conf.place_in_studs(Brick(3010, "White", conf), [0, 0, 0], rotation=1)
-    conf.place_in_studs(Brick(3010, "White", conf), [0, 0, 3], rotation=1)
-    conf.place_in_studs(Brick(3020, "White", conf), [0, 0, 6], rotation=0)
-    # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
-    conf.place_in_tubes(Brick(3010, "White", conf), [0, 3, 3], rotation=1)
-    conf.place_in_tubes(Brick(3003, "White", conf), [3, 3, 0], rotation=0)
-    conf.place_in_studs(Brick(3003, "White", conf), [3, 5, 0], rotation=0)
+    conf = Configuration()
+    # conf.place_in_studs(Brick(3010, "White", conf), [0, 0, 0], rotation=1)
+    # conf.place_in_studs(Brick(3010, "White", conf), [0, 0, 3], rotation=1)
+    # conf.place_in_studs(Brick(3020, "White", conf), [0, 0, 6], rotation=0)
+    # # print(configuration.place_in_tubes(Brick(3010, "White", configuration), [0, 0, 3], rotation=1))
+    # conf.place_in_tubes(Brick(3010, "White", conf), [0, 3, 3], rotation=1)
+    # conf.place_in_tubes(Brick(3003, "White", conf), [3, 3, 0], rotation=0)
+    # conf.place_in_studs(Brick(3003, "White", conf), [3, 5, 0], rotation=0)
+    #
+    # disponible_pices = [[3010, 3], [3003, 2], [3020, 2], [3005, 5]]
+    # conf_initial = init_conf_with_placeholders(conf)
+    #
+    # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 0], rotation=1)
+    # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 3], rotation=1)
+    # conf_initial.replace(db_brick_id=3020, start_coordinates=[0, 0, 6], rotation=0)
+    # conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 3, 3], rotation=1)
+    # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=0)
+    # conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 5, 0], rotation=0)
+    conf.load_configuration("D:\\Informatica\\Anul 3 Semestrul 1\\Inteligenta Artificiala\\ProiectAI\\desktop_app\\configurations\\1.txt")
+    verificare(conf)
 
-    disponible_pices = [[3010, 3], [3003, 2], [3020, 2], [3005, 5]]
-    conf_initial = init_conf_with_placeholders(conf)
-
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 0], rotation=1)
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 0, 3], rotation=1)
-    conf_initial.replace(db_brick_id=3020, start_coordinates=[0, 0, 6], rotation=0)
-    conf_initial.replace(db_brick_id=3010, start_coordinates=[0, 3, 3], rotation=1)
-    conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 3, 0], rotation=0)
-    conf_initial.replace(db_brick_id=3003, start_coordinates=[3, 5, 0], rotation=0)
-
-    print(is_final_state(conf_initial, []))
+    print(is_final_state(conf, []))
