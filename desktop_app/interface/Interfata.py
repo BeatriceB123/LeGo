@@ -274,7 +274,7 @@ class MainWindow(QWidget):
         QWidget.__init__(self, *args)
         self.setMinimumSize(QSize(1200, 800))
         self.setMaximumSize(QSize(1200, 800))
-        self.setWindowTitle("Lego")
+        self.setWindowTitle("LeGoSearch")
         QApplication.setStyle("fusion")
         self.setWindowIcon(QIcon("Icon.png"))
         # self.setStyleSheet("background-color: #F93822")
