@@ -41,4 +41,4 @@ def main_function(user_list, same_bricks, same_color, flg = False):
 
 
 if __name__ == '__main__':
-    print(main_function([[3001, 8, "White"], [3010, 6, "White"], [3622, 4, "White"], [3039, 1, "White"], [3004, 5, "White"]], False, False))
+    print(main_function([[3034, 1, "Green"], [3004, 4, "Green"], [3659, 2, "Green"], [2456, 1, "Green"], [3003, 1, "Green"], [3062, 2, "Green"]], True, True))
