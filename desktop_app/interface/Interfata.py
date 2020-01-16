@@ -445,6 +445,9 @@ class MainWindow(QWidget):
         self.left_side_layout.addWidget(self.tableWidget)
 
     def generate_button_clicked(self):
+        where_are_we = os.getcwd()
+        if where_are_we[-9:] != "interface":
+            os.chdir(os.getcwd() + "\\interface")
         result = dict()
         list_of_data = []
         for row in range(0, self.tableWidgetRight.rowCount()):
