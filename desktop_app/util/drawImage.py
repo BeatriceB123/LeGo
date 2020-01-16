@@ -3,8 +3,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+import os
 
-imagePath = "../desktop_app/lego_pictures/"
+imagePath = "..\\lego_pictures\\"
 
 
 class ImgWidget(QWidget):

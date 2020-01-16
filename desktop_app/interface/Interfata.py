@@ -96,6 +96,13 @@ class AddItemWindow(QWidget):
         self.color_box.addItem("Blue")
         self.color_box.addItem("Red")
         self.color_box.addItem("Green")
+        self.color_box.addItem("Yellow")
+        self.color_box.addItem("Lime-Green")
+        self.color_box.addItem("Black")
+        self.color_box.addItem("Gray")
+        self.color_box.addItem("Light-Gray")
+        self.color_box.addItem("Brown")
+        self.color_box.addItem("Purple")
 
         self.color_layout.addWidget(self.color_box)
 
@@ -434,12 +441,12 @@ class MainWindow(QWidget):
         result = dict()
         list_of_data = []
         for row in range(0, self.tableWidgetRight.rowCount()):
-            list_of_data.append((self.tableWidgetRight.item(row, 1).text(),
-                                 self.tableWidgetRight.item(row, 2).text(),
+            list_of_data.append((int(self.tableWidgetRight.item(row, 1).text()),
+                                 int(self.tableWidgetRight.item(row, 2).text()),
                                  self.tableWidgetRight.item(row, 3).text()))
-        result = main_function.main_function(list_of_data, self.check_box.isChecked(), self.color_check_box.isChecked())
+        result = main_function.main_function(list_of_data, self.check_box.isChecked(), self.color_check_box.isChecked(), flg=True)
+        # os.chdir("..\\interface")
         self.end_tab = last_screen.EndScreen(result)
-        print("Not implemented")
 
     def configuration_button_clicked(self):
         self.config_tab = config.AddConfigurationScreen()

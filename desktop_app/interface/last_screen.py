@@ -47,7 +47,7 @@ class EndScreen(QWidget):
         self.configuration_image.move(10, 10)
         self.configuration_image.setFixedWidth(580)
         self.configuration_image.setFixedHeight(520)
-        self.configuration_image.setStyleSheet("background-color: #F93822")
+        # self.configuration_image.setStyleSheet("background-color: #F93822")
 
         self.configuration_name = QLabel(self)
         self.configuration_name.move(160, 540)
@@ -68,22 +68,28 @@ class EndScreen(QWidget):
         count = 0
         text_file = []
         jpg_file = []
-        for root, dirs, files in os.walk("..\\configurations\\"):
+        for root, dirs, files in os.walk(".\\configurations\\"):
             for i in files:
                 if i.endswith(".txt"):
                     text_file.append(os.path.join(root, i))
                 elif i.endswith(".jpg"):
                     text_file.append(os.path.join(root, i))
-        pix_map = QPixmap("..\\configurations\\" + algorithm_solution[count][0] + '.jpg')
-        pix_map.scaled(580, 520)
-        self.configuration_image.setPixmap(pix_map)
-        self.configuration_name.setText("Configuration_" + algorithm_solution[count][0])
+        if len(algorithm_solution) > 0:
+            pix_map = QPixmap(".\\configurations\\" + algorithm_solution[count][0] + '.jpg')
+            pix_map.scaled(580, 520)
+            self.configuration_image.setPixmap(pix_map)
+            self.configuration_name.setText("Configuration_" + algorithm_solution[count][0])
+            self.next_button.setEnabled(True)
+            self.previous_button.setEnabled(True)
+        else:
+            self.next_button.setEnabled(False)
+            self.previous_button.setEnabled(False)
 
     def next_button_clicked(self):
         global count
         global algorithm_solution
         count = (count + 1) % len(algorithm_solution)
-        pix_map = QPixmap("..\\configurations\\" + algorithm_solution[count][0] + '.jpg')
+        pix_map = QPixmap(".\\configurations\\" + algorithm_solution[count][0] + '.jpg')
         pix_map.scaled(580, 520)
         self.configuration_image.setPixmap(pix_map)
         self.configuration_name.setText("Configuration_" + algorithm_solution[count][0])
@@ -92,7 +98,7 @@ class EndScreen(QWidget):
         global count
         global algorithm_solution
         count = (count - 1) % len(algorithm_solution)
-        pix_map = QPixmap("..\\configurations\\" + algorithm_solution[count][0] + '.jpg')
+        pix_map = QPixmap(".\\configurations\\" + algorithm_solution[count][0] + '.jpg')
         pix_map.scaled(580, 520)
         self.configuration_image.setPixmap(pix_map)
         self.configuration_name.setText("Configuration_" + algorithm_solution[count][0])

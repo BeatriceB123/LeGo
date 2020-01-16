@@ -1,11 +1,18 @@
 import os
 from configuration import *
 from configs_by_color import *
+import sys
+# sys.path.append("..\\")
 
 
-def main_function(user_list, same_bricks, same_color):
+def main_function(user_list, same_bricks, same_color, flg = False):
     response = dict()
-    directory = "configurations"
+    os.chdir("..\\")
+    directory = "configurations\\"
+    # if flg == True:
+    #     directory = "..\\configurations\\"
+    # else:
+    #     directory = "configurations"
     for filename in os.listdir(directory):
         if filename.endswith(".txt"):
             config = Configuration()

@@ -29,8 +29,8 @@ class AddConfigurationScreen(QWidget):
 
     def initUI(self):
         self.setWindowTitle('Add Configuration')
-        self.setMinimumSize(QSize(900, 420))
-        self.setMaximumSize(QSize(900, 420))
+        self.setMinimumSize(QSize(1000, 420))
+        self.setMaximumSize(QSize(1000, 420))
         QApplication.setStyle("fusion")
         self.move(400, 400)
 
@@ -173,25 +173,42 @@ class AddConfigurationScreen(QWidget):
         row_cnt = get_number_of_lines()
         self.help_table = QTableWidget(self)
         self.help_table.move(630, 10)
+        self.help_table.setFixedWidth(360)
         self.help_table.setFixedHeight(400)
         self.help_table.setRowCount(row_cnt)
         self.help_table.setColumnCount(2)
-        self.help_table.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
-        self.help_table.setHorizontalHeaderItem(1, QTableWidgetItem("Image"))
+        self.help_table.setHorizontalHeaderItem(0, QTableWidgetItem("Image"))
+        self.help_table.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
         self.help_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
+        # res = drawImage.imagePath
+        max_width = 0
         for i in range(0, row_cnt):
             aux = add_draw_image + list_of_images_id_add[i]
             drawImage.imagePath = aux
 
+            self.help_table.setCellWidget(i, 0, drawImage.ImgWidget(self))
             id_item = QTableWidgetItem(list_of_images_id_add[i])
             id_item.setTextAlignment(Qt.AlignCenter)
-            self.help_table.setItem(i, 0, id_item)
-            self.help_table.setCellWidget(i, 1, drawImage.ImgWidget(self))
+            self.help_table.setItem(i, 1, id_item)
 
-            image = Image.open(aux + ".png")
+            image = Image.open(drawImage.imagePath + ".png")
             width, height = image.size
             self.help_table.setRowHeight(i, height)
+            drawImage.imagePath = add_draw_image
+            if width > max_width:
+                max_width = width
+
+        self.help_table.setColumnWidth(0, max_width)
+
+            # id_item = QTableWidgetItem(list_of_images_id_add[i])
+            # id_item.setTextAlignment(Qt.AlignCenter)
+            # self.help_table.setItem(i, 0, id_item)
+            # self.help_table.setCellWidget(i, 1, drawImage.ImgWidget(self))
+            #
+            # image = Image.open(aux + ".png")
+            # width, height = image.size
+            # self.help_table.setRowHeight(i, height)
 
     def select_path_button_clicked(self):
         filename, _ = QFileDialog.getOpenFileName(filter='JPG(*.jpg)')
