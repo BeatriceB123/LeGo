@@ -25,7 +25,7 @@ def main_function(user_list, same_bricks, same_color, flg = False):
             elif not same_bricks and same_color:
                 configs_by_color = get_configs_by_color(config)
                 result = True
-                for key, value in configs_by_color:
+                for key, value in configs_by_color.items():
                     if result:
                         user_list_filtered = get_pieces_by_color(key, user_list)
                         aux = verify_if_we_can_build(value, user_list_filtered)
