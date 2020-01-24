@@ -118,6 +118,9 @@ class AddItemWindow(QWidget):
         if self.amount_line_edit.text() == '' or self.amount_line_edit.text() == '0' or self.amount_line_edit.text() == '-':
             self.error_label.setVisible(True)
         else:
+            where_are_we = os.getcwd()
+            if where_are_we[-9:] != "interface":
+                os.chdir(os.getcwd() + "\\interface")
             path = drawImage.imagePath
             drawImage.imagePath = drawImage.imagePath + current_piece + ".png"
 

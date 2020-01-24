@@ -1,10 +1,7 @@
 import copy
 import os
 import re
-import sys
-from itertools import combinations, permutations, product
-from pprint import pprint
-import traceback
+from itertools import product
 ID_EXCEP = -1
 
 
@@ -627,15 +624,7 @@ def volume_conf(configuration):
 goo_li = []
 
 
-count1 = 0
-
-
-def bkt(actual_config, disponible_pieces):
-    global count1
-    count1 = count1 + 1
-    print("Count: " + str(count1))
-    if count1 >= 1000:
-        return False
+def greedy(actual_config, disponible_pieces):
     for piece in disponible_pieces:
         places = get_all_places_where_you_can_put_piece(actual_config, piece[0])
         if len(places) >= piece[1]:
@@ -649,8 +638,7 @@ def bkt(actual_config, disponible_pieces):
                         goo_li.append(aux_conf)
                         return True
                     else:
-                        if bkt(aux_conf, aux_disponible_pieces):
-                            return True
+                        return greedy(aux_conf, aux_disponible_pieces)
     return False
 
 
@@ -708,9 +696,7 @@ def verify_if_we_can_build(configuration, disponible_pieces):
     print(good_combination)
     for pieces in good_combination:
         configuration_aux = init_conf_with_placeholders(configuration)
-        global count1
-        count1 = 0
-        bkt(init_conf_with_placeholders(configuration_aux), pieces)
+        greedy(init_conf_with_placeholders(configuration_aux), pieces)
         if len(goo_li) > 0:
             return True
     return False
