@@ -1,0 +1,7 @@
+1. Creat configuratia "config.jpg"
+2. Testat filtre/import/export/add/update/delete
+3. Import list_0.json -> testat algoritmul fara ticuri
+3. Import list_1.json -> testat algoritmul fara ticuri
+4. Import list_2.json -> testat cei 3 algoritmi cu ticuri
+5. Import list_2-1.json -> testat aceeasi algoritmi, accentul fiind pus pe aceeasi culoare dar nu aceleasi piese
+6. Import list_3.json -> testat algoritmul cu ticul de aceleasi piese

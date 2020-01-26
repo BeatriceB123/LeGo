@@ -465,6 +465,9 @@ class MainWindow(QWidget):
         self.config_tab = config.AddConfigurationScreen()
 
     def import_button_clicked(self):
+        where_are_we = os.getcwd()
+        if where_are_we[-9:] != "interface":
+            os.chdir(os.getcwd() + "\\interface")
         filename, _ = QFileDialog.getOpenFileName(filter='JSON(*.json)')
         if filename is not '':
             self.tableWidgetRight.setRowCount(0)
