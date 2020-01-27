@@ -1,0 +1,17 @@
+Prezentare echipa.
+Motivatie:
+-Aminteste de copilarie.
+-Ajuta persoanele pasionate de lego.
+-proiect atractiv
+
+    Pentru noi, acest proiect a fost cel mai interesant din lista primita, fiind un subiect care ne-a adus aminte de copilarie, 
+cand incercam cu piesele pe care le aveam sa ne imaginam si sa construim diferite structuri.
+    Procesul cel mai de durata este cel de gandire a unor configuratii posibile in functie de numarul si tipul de piese pe care le avem.
+Pentru persoanele pasionate de lego, care detin mii de piese, de diferite tipuri si in diferite culori, sarcina de a pregati configuratii
+posibile ocupa un interval de timp mult prea mare, aici intervenind aplicatia noastra.
+    Aplicatia vine cu un set predefinit de 15 configuratii, la care utilizatorul poate adauga alte configuratii. Utilizatorul isi v-a adauga
+colectia de piese in aplicatie, prin adaugarea manuala a pieselor sau prin importarea lor intr-un format cunoscut de aplicatie (JSON),
+aceasta generandu-i configuratiile ce le poate construi cu piesele pe care le detine. 
+    Utilizatorul poate sa adauge piese si sa genereze configuratiile posibile pentru piesele respective, astfel putand sa afle ce piese
+ar putea avea nevoie in colectia sa, pentru a construi respectivele configuratii, lista de brick-uri avand posibilitatea de a fi exportata
+in formatul JSON pentru a fi utilizata ulterior.
