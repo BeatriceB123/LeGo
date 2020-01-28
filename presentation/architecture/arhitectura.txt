@@ -1,0 +1,27 @@
+Sa trecem la arhitectura aplicatiei. 
+
+Utilizatorul aplicatiei LeGoSearch interactioneaza doar cu interfata. Interfata este facuta in Python, cu ajutorul librariei PyQt5.
+Din interfata el poate selecta pisele pe care le detine(alegandu-si culoare si numarul lor), poate vizualiza configuratiile pe care le poate construi cu piesele pe care le detine, sau poate sa creeze noi configuratii.
+
+Lista tuturor pieselor existente, ce pot fi folosite in aplicatie, o tinem intr-un JSON, generat cu un script. O piesa este definita de un id unic, si niste atribute precum: lungime, latime, inaltime, spatiile ocupate, studuri si tuburi. Spatiile ocupate de o piesa reprezinta coordonatele pe care le acopera piesa daca e plasata cu coltul din stanga jos in origine. In mod similar, studurile sunt coordonatele ocupate de butonul de sus al piesei, iar tuburile reprezinta spatiul gol in care se introduc studurile.
+
+Partea de back-end este facuta tot in python. Aici se primesc solicitarile din interfata, si in functie de optiunile selectate / flagurile setate, se apeleaza algoritmul de cautare / functii de import / export. Apoi se trimit inapoi catre interfata rezultatele obtinute.  
+
+Daca este selectat flagul pentru aceleasi piese inseamnca ca se vor toate configuratiile ce se pot forma cu exact aceleasi piese ca cele din configuratia initiala, dar nu conteaza culoarea lor. 
+Daca nu este selectat flagul pentru aceleasi piese inseamna ca ne intereseaza sa alcatuim aceeasi configuratie, dar putem folosi si alte piese decat cele initiale. Adica putem alcatui piese/grupuri de piese prin compunere. 
+
+In timp ce ruleaza, am sa explic cum functioneaza algoritmul general; el verifica daca se poate ajunge la o configuratie, folosind piese de diverse culori, si cu optiunea de a inlocui unele piese cu combinatii de piese disponibile, pentru a alcatui aceeasi forma:
+1. Piesele utilizatorul vor fi filtrate. Daca sunt piese speciale/neinlocuibile in configuratia la care vrem sa ajungem, adunci le eliminam din configuratie si le marcam in lista utilizatorului. Apoi, selectam piesele in asa fel incat volumul lor sa fie egal cu volumul la care ar trebui sa ajungem. (Volumul este dat de numarul de spatii)
+2. se porneste de la configuratia la care se vrea sa se ajunga, si se umple cu piese de cea mai mica dimensiune posibila (cele cu id-ul 3024). 
+3. Facem backtracking. 
+O tranzitie valida va fi reprezentata de inlocuirea in mod perfect a unor piese mici cu o piesa mare
+Starea finala este starea in care toate piesele din configuratie au fost inlocuite cu succes de piesele oferite de utilizator si totodata, nu exista piese suspendate.
+ 
+
+Pentru variata in care putem compune piese, dar trebuie sa se obtina aceleasi culori pentru configuratie:
+1. pornind de la configuratia de baza, construim mai multe configuratii mai micute ce au aceleasi culori pe tot spatiul, si apelam algoritmul de mai sus pentru fiecare in parte. 
+
+
+
+
+
